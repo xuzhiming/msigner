@@ -24,8 +24,8 @@ import {
   calculateTxBytesFeeWithRate,
   getSellerOrdOutputValue,
 } from './vendors/feeprovider';
-import { FullnodeRPC } from './vendors/fullnoderpc';
-import { getFees } from './vendors/mempool';
+// import { FullnodeRPC } from './vendors/fullnoderpc';
+import { getFees, getTxHex, getTx, getTxStatus } from './vendors/mempool';
 import {
   FeeProvider,
   IListingState,
@@ -53,9 +53,10 @@ export namespace SellerSigner {
       listing.seller.ordItem.output.split(':');
 
     const tx = bitcoin.Transaction.fromHex(
-      await FullnodeRPC.getrawtransaction(
-        listing.seller.ordItem.output.split(':')[0],
-      ),
+      // await FullnodeRPC.getrawtransaction(
+      //   listing.seller.ordItem.output.split(':')[0]
+      // ),
+      await getTxHex(listing.seller.ordItem.output.split(':')[0]),
     );
 
     // No need to add this witness if the seller is using taproot
@@ -131,12 +132,12 @@ export namespace SellerSigner {
     });
 
     // verify signatures valid, so that the psbt is signed by the item owner
-    if (
-      (await FullnodeRPC.analyzepsbt(req.signedListingPSBTBase64))?.inputs[0]
-        ?.is_final !== true
-    ) {
-      throw new InvalidArgumentError(`Invalid signature`);
-    }
+    // if (
+    //   (await FullnodeRPC.analyzepsbt(req.signedListingPSBTBase64))?.inputs[0]
+    //     ?.is_final !== true
+    // ) {
+    //   throw new InvalidArgumentError(`Invalid signature`);
+    // }
 
     // verify that the input's sellerOrdAddress is the same as the sellerOrdAddress of the utxo
     if (psbt.inputCount !== 1) {
@@ -172,9 +173,10 @@ export namespace SellerSigner {
     // verify that the seller address is a match
     const sellerAddressFromPSBT = bitcoin.address.fromOutputScript(
       bitcoin.Transaction.fromHex(
-        await FullnodeRPC.getrawtransaction(
-          generateTxidFromHash(psbt.txInputs[0].hash),
-        ),
+        // await FullnodeRPC.getrawtransaction(
+        //   generateTxidFromHash(psbt.txInputs[0].hash),
+        // ),
+        await getTxHex(generateTxidFromHash(psbt.txInputs[0].hash)),
       ).outs[psbt.txInputs[0].index].script,
       network,
     );
@@ -270,13 +272,11 @@ Needed:       ${satToBtc(amount)} BTC`);
     }
 
     // if it's not confirmed, we search the input script for the inscription
-    const tx = await FullnodeRPC.getrawtransactionVerbose(utxo.txid);
+    const tx = await getTx(utxo.txid);
+    //await FullnodeRPC.getrawtransactionVerbose(utxo.txid);
     let foundInscription = false;
     for (const input of tx.vin) {
-      if (
-        (await FullnodeRPC.getrawtransactionVerbose(input.txid))
-          .confirmations === 0
-      ) {
+      if ((await getTxStatus(input.txid)).confirmed === false) {
         return true; // to error on the safer side, and treat this as possible to have a inscription
       }
       const previousOutput = `${input.txid}:${input.vout}`;
@@ -297,7 +297,8 @@ Needed:       ${satToBtc(amount)} BTC`);
     const [ordinalUtxoTxId, ordinalUtxoVout] =
       listing.seller.ordItem.output.split(':');
     const tx = bitcoin.Transaction.fromHex(
-      await FullnodeRPC.getrawtransaction(ordinalUtxoTxId),
+      // await FullnodeRPC.getrawtransaction(ordinalUtxoTxId),
+      await getTxHex(ordinalUtxoTxId),
     );
     // No need to add this witness if the seller is using taproot
     if (!listing.seller.tapInternalKey) {
@@ -552,20 +553,20 @@ Missing:    ${satToBtc(-changeValue)} BTC`;
     });
 
     // verify all the signatures are valid from the buyer except the seller input
-    const analyzepsbtInputs = (
-      await FullnodeRPC.analyzepsbt(req.signedBuyingPSBTBase64)
-    ).inputs;
-    for (let i = 0; i < analyzepsbtInputs.length; i++) {
-      if (
-        i !== BUYING_PSBT_SELLER_SIGNATURE_INDEX &&
-        analyzepsbtInputs[i].is_final !== true
-      ) {
-        throw new InvalidArgumentError('Invalid signature');
-      }
-      if (!analyzepsbtInputs[i].has_utxo) {
-        throw new InvalidArgumentError('Missing utxo');
-      }
-    }
+    // const analyzepsbtInputs = (
+    //   await FullnodeRPC.analyzepsbt(req.signedBuyingPSBTBase64)
+    // ).inputs;
+    // for (let i = 0; i < analyzepsbtInputs.length; i++) {
+    //   if (
+    //     i !== BUYING_PSBT_SELLER_SIGNATURE_INDEX &&
+    //     analyzepsbtInputs[i].is_final !== true
+    //   ) {
+    //     throw new InvalidArgumentError('Invalid signature');
+    //   }
+    //   if (!analyzepsbtInputs[i].has_utxo) {
+    //     throw new InvalidArgumentError('Missing utxo');
+    //   }
+    // }
 
     // verify that we are paying to the correct buyerTokenReceiveAddress
     const buyerTokenReceiveAddress =

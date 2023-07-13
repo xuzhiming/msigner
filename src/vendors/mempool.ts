@@ -20,6 +20,18 @@ export async function getMempoolTxIds() {
   return await mempoolBitcoin.mempool.getMempoolTxids();
 }
 
+export async function getTxHex(txid:string) {
+  return await mempoolBitcoin.transactions.getTxHex({txid});
+}
+
+export async function getTx(txid:string) {
+  return await mempoolBitcoin.transactions.getTx({txid});
+}
+
+export async function getTxStatus(txid:string) {
+  return await mempoolBitcoin.transactions.getTxStatus({txid});
+}
+
 export async function getFees(feeRateTier: string) {
   const res = await mempoolBitcoin.fees.getFeesRecommended();
   switch (feeRateTier) {
