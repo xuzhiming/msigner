@@ -1,6 +1,6 @@
 import { AddressTxsUtxo } from '@mempool/mempool.js/lib/interfaces/bitcoin/addresses';
 import * as bitcoin from 'bitcoinjs-lib';
-import * as ecc from 'tiny-secp256k1';
+// import * as ecc from 'tiny-secp256k1';
 import {
   BTC_NETWORK,
   BUYING_PSBT_BUYER_RECEIVE_INDEX,
@@ -25,7 +25,13 @@ import {
   getSellerOrdOutputValue,
 } from './vendors/feeprovider';
 // import { FullnodeRPC } from './vendors/fullnoderpc';
-import { getFees, getTxHex, getTx, getTxStatus } from './vendors/mempool';
+import {
+  getFees,
+  getTxHex,
+  getTx,
+  getTxStatus,
+  getUtxosByAddress,
+} from './vendors/mempool';
 import {
   FeeProvider,
   IListingState,
@@ -36,13 +42,18 @@ import {
   WitnessUtxo,
   utxo,
 } from './interfaces';
+import { testnet } from 'bitcoinjs-lib/src/networks';
 
-bitcoin.initEccLib(ecc);
+// bitcoin.initEccLib(ecc);
 
 const network =
   BTC_NETWORK === 'mainnet'
     ? bitcoin.networks.bitcoin
     : bitcoin.networks.testnet;
+
+export async function getAddressUtxos(address: string) {
+  return await getUtxosByAddress(address);
+}
 
 export namespace SellerSigner {
   export async function generateUnsignedListingPSBTBase64(
@@ -217,6 +228,8 @@ export namespace BuyerSigner {
     feeRateTier: string,
     itemProvider: ItemProvider,
   ) {
+    amount += DUMMY_UTXO_VALUE * 2;
+
     const selectedUtxos = [];
     let selectedAmount = 0;
 
@@ -252,7 +265,7 @@ Address has:  ${satToBtc(selectedAmount)} BTC
 Needed:       ${satToBtc(amount)} BTC`);
     }
 
-    return selectedUtxos;
+    return await mapUtxos(selectedUtxos);
   }
 
   async function doesUtxoContainInscription(
@@ -312,7 +325,7 @@ Needed:       ${satToBtc(amount)} BTC`);
     const sellerInput: any = {
       hash: ordinalUtxoTxId,
       index: parseInt(ordinalUtxoVout),
-      nonWitnessUtxo: tx.toBuffer(),
+      // nonWitnessUtxo: tx.toBuffer(),
       // No problem in always adding a witnessUtxo here
       witnessUtxo: tx.outs[parseInt(ordinalUtxoVout)],
     };
@@ -392,27 +405,13 @@ Needed:       ${satToBtc(amount)} BTC`);
       totalInput += dummyUtxo.value;
     }
 
-    // Add dummy output
-    psbt.addOutput({
-      address: listing.buyer.buyerAddress,
-      value:
-        listing.buyer.buyerDummyUTXOs[0].value +
-        listing.buyer.buyerDummyUTXOs[1].value +
-        Number(listing.seller.ordItem.location.split(':')[2]),
-    });
-    // Add ordinal output
-    psbt.addOutput({
-      address: listing.buyer.buyerTokenReceiveAddress,
-      value: ORDINALS_POSTAGE_VALUE,
-    });
-
     const { sellerInput, sellerOutput } = await getSellerInputAndOutput(
       listing,
     );
 
     psbt.addInput(sellerInput);
-    psbt.addOutput(sellerOutput);
 
+    totalInput += listing.seller.ordItem.outputValue;
     // Add payment utxo inputs
     for (const utxo of listing.buyer.buyerPaymentUTXOs) {
       const input: any = {
@@ -447,21 +446,38 @@ Needed:       ${satToBtc(amount)} BTC`);
       totalInput += utxo.value;
     }
 
-    // Create a platform fee output
-    let platformFeeValue = Math.floor(
-      (listing.seller.price *
-        (listing.buyer.takerFeeBp + listing.seller.makerFeeBp)) /
-        10000,
-    );
-    platformFeeValue =
-      platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 0;
+    // Add dummy output
+    psbt.addOutput({
+      address: listing.buyer.buyerAddress,
+      value:
+        listing.buyer.buyerDummyUTXOs[0].value +
+        listing.buyer.buyerDummyUTXOs[1].value +
+        Number(listing.seller.ordItem.location.split(':')[2]),
+    });
 
-    if (platformFeeValue > 0) {
-      psbt.addOutput({
-        address: PLATFORM_FEE_ADDRESS,
-        value: platformFeeValue,
-      });
-    }
+    // Add ordinal output
+    psbt.addOutput({
+      address: listing.buyer.buyerTokenReceiveAddress,
+      value: listing.seller.ordItem.outputValue,
+    });
+
+    psbt.addOutput(sellerOutput);
+
+    // Create a platform fee output
+    // let platformFeeValue = Math.floor(
+    //   (listing.seller.price *
+    //     (listing.buyer.takerFeeBp + listing.seller.makerFeeBp)) /
+    //     10000,
+    // );
+    // platformFeeValue =
+    //   platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 0;
+
+    // if (platformFeeValue > 0) {
+    //   psbt.addOutput({
+    //     address: PLATFORM_FEE_ADDRESS,
+    //     value: platformFeeValue,
+    //   });
+    // }
 
     // Create two new dummy utxo output for the next purchase
     psbt.addOutput({
