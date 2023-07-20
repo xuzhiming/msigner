@@ -198,6 +198,27 @@ export namespace SellerSigner {
 }
 
 export namespace BuyerSigner {
+  export async function checkDummyUtxos(
+    addressUtxos: AddressTxsUtxo[],
+    itemProvider: ItemProvider,
+  ): Promise<boolean> {
+    let dummyCount = 0;
+    for (const utxoFromMempool of addressUtxos) {
+      if (
+        utxoFromMempool.value >= DUMMY_UTXO_MIN_VALUE &&
+        utxoFromMempool.value <= DUMMY_UTXO_MAX_VALUE
+      ) {
+        if (await doesUtxoContainInscription(utxoFromMempool, itemProvider)) {
+          continue;
+        }
+        dummyCount++;
+      }
+      if (dummyCount == 2) break;
+    }
+
+    return dummyCount == 2;
+  }
+
   export async function selectDummyUTXOs(
     utxos: AddressTxsUtxo[],
     itemProvider: ItemProvider,
