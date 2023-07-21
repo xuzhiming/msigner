@@ -1,6 +1,7 @@
 import { AddressTxsUtxo } from '@mempool/mempool.js/lib/interfaces/bitcoin/addresses';
 import * as bitcoin from 'bitcoinjs-lib';
 // import * as ecc from 'tiny-secp256k1';
+
 import {
   BTC_NETWORK,
   BUYING_PSBT_BUYER_RECEIVE_INDEX,
@@ -10,6 +11,7 @@ import {
   DUMMY_UTXO_MIN_VALUE,
   DUMMY_UTXO_VALUE,
   ORDINALS_POSTAGE_VALUE,
+  PLATFORM_FEE,
   PLATFORM_FEE_ADDRESS,
 } from './constant';
 import {
@@ -346,7 +348,7 @@ Needed:       ${satToBtc(amount)} BTC`);
     const sellerInput: any = {
       hash: ordinalUtxoTxId,
       index: parseInt(ordinalUtxoVout),
-      // nonWitnessUtxo: tx.toBuffer(),
+      nonWitnessUtxo: tx.toBuffer(),
       // No problem in always adding a witnessUtxo here
       witnessUtxo: tx.outs[parseInt(ordinalUtxoVout)],
     };
@@ -494,10 +496,10 @@ Needed:       ${satToBtc(amount)} BTC`);
     //   platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 0;
 
     // if (platformFeeValue > 0) {
-    //   psbt.addOutput({
-    //     address: PLATFORM_FEE_ADDRESS,
-    //     value: platformFeeValue,
-    //   });
+      psbt.addOutput({
+        address: PLATFORM_FEE_ADDRESS,
+        value: PLATFORM_FEE,
+      });
     // }
 
     // Create two new dummy utxo output for the next purchase
