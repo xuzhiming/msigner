@@ -20,12 +20,12 @@
     "lint:fix": "pnpm run lint --fix"
   },
   "dependencies": {
+    "@bitcoinerlab/secp256k1": "^1.0.5",
     "@mempool/mempool.js": "^2.3.0",
     "bitcoinjs-lib": "^6.1.0",
     "net": "^1.0.2",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "rpc-bitcoin": "^2.0.0"
-
   },
   "devDependencies": {
     "@types/chai": "^4.3.4",

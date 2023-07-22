@@ -1,6 +1,7 @@
 import { AddressTxsUtxo } from '@mempool/mempool.js/lib/interfaces/bitcoin/addresses';
 import * as bitcoin from 'bitcoinjs-lib';
 // import * as ecc from 'tiny-secp256k1';
+import * as ecc from "@bitcoinerlab/secp256k1";
 
 import {
   BTC_NETWORK,
@@ -46,7 +47,7 @@ import {
 } from './interfaces';
 import { testnet } from 'bitcoinjs-lib/src/networks';
 
-// bitcoin.initEccLib(ecc);
+bitcoin.initEccLib(ecc);
 
 const network =
   BTC_NETWORK === 'mainnet'
@@ -418,6 +419,8 @@ Needed:       ${satToBtc(amount)} BTC`);
           value: dummyUtxo.value,
         } as WitnessUtxo;
         p2shInputRedeemScript.redeemScript = p2sh.redeem?.output;
+      }else {
+        input.witnessUtxo = dummyUtxo.tx.outs[dummyUtxo.vout];
       }
 
       psbt.addInput({
@@ -458,6 +461,8 @@ Needed:       ${satToBtc(amount)} BTC`);
           value: utxo.value,
         } as WitnessUtxo;
         p2shInputRedeemScriptUn.redeemScript = p2sh.redeem?.output;
+      }else {
+        input.witnessUtxo = utxo.tx.outs[utxo.vout];
       }
 
       psbt.addInput({
@@ -741,9 +746,9 @@ Missing:    ${satToBtc(-changeValue)} BTC`;
         const p2sh = bitcoin.payments.p2sh({
           redeem: { output: redeemScript },
         });
-        input.witnessUtxo = utxo.tx.outs[utxo.vout];
         input.redeemScript = p2sh.redeem?.output;
       }
+      input.witnessUtxo = utxo.tx.outs[utxo.vout];
 
       psbt.addInput(input);
       totalValue += utxo.value;
