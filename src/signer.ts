@@ -252,7 +252,7 @@ export namespace BuyerSigner {
     feeRateTier: string,
     itemProvider: ItemProvider,
   ) {
-    amount += DUMMY_UTXO_VALUE * 2;
+    amount += DUMMY_UTXO_VALUE * 2 + PLATFORM_FEE;
 
     const selectedUtxos = [];
     let selectedAmount = 0;
