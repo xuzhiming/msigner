@@ -1,7 +1,7 @@
 import { AddressTxsUtxo } from '@mempool/mempool.js/lib/interfaces/bitcoin/addresses';
 import * as bitcoin from 'bitcoinjs-lib';
 // import * as ecc from 'tiny-secp256k1';
-import * as ecc from "@bitcoinerlab/secp256k1";
+import * as ecc from '@bitcoinerlab/secp256k1';
 
 import {
   BTC_NETWORK,
@@ -270,15 +270,12 @@ export namespace BuyerSigner {
       selectedUtxos.push(utxo);
       selectedAmount += utxo.value;
 
-      if (
-        selectedAmount >=
-        amount +
-          (await calculateTxBytesFee(
-            vinsLength + selectedUtxos.length,
-            voutsLength,
-            feeRateTier,
-          ))
-      ) {
+      const fee = await calculateTxBytesFee(
+        vinsLength + selectedUtxos.length,
+        voutsLength,
+        feeRateTier,
+      );
+      if (selectedAmount >= amount + fee) {
         break;
       }
     }
@@ -419,7 +416,7 @@ Needed:       ${satToBtc(amount)} BTC`);
           value: dummyUtxo.value,
         } as WitnessUtxo;
         p2shInputRedeemScript.redeemScript = p2sh.redeem?.output;
-      }else {
+      } else {
         input.witnessUtxo = dummyUtxo.tx.outs[dummyUtxo.vout];
       }
 
@@ -461,7 +458,7 @@ Needed:       ${satToBtc(amount)} BTC`);
           value: utxo.value,
         } as WitnessUtxo;
         p2shInputRedeemScriptUn.redeemScript = p2sh.redeem?.output;
-      }else {
+      } else {
         input.witnessUtxo = utxo.tx.outs[utxo.vout];
       }
 
@@ -479,8 +476,8 @@ Needed:       ${satToBtc(amount)} BTC`);
       address: listing.buyer.buyerAddress,
       value:
         listing.buyer.buyerDummyUTXOs[0].value +
-        listing.buyer.buyerDummyUTXOs[1].value 
-        // + Number(listing.seller.ordItem.location.split(':')[2]),
+        listing.buyer.buyerDummyUTXOs[1].value,
+      // + Number(listing.seller.ordItem.location.split(':')[2]),
     });
 
     // Add ordinal output
@@ -501,10 +498,10 @@ Needed:       ${satToBtc(amount)} BTC`);
     //   platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 0;
 
     // if (platformFeeValue > 0) {
-      psbt.addOutput({
-        address: PLATFORM_FEE_ADDRESS,
-        value: PLATFORM_FEE,
-      });
+    psbt.addOutput({
+      address: PLATFORM_FEE_ADDRESS,
+      value: PLATFORM_FEE,
+    });
     // }
 
     // Create two new dummy utxo output for the next purchase
