@@ -532,7 +532,8 @@ Needed:       ${satToBtc(amount)} BTC`);
     if (changeValue < 0) {
       throw new Error(`Your wallet address doesn't have enough funds to buy this inscription.
 Price:      ${satToBtc(listing.seller.price)} BTC
-Required:   ${satToBtc(totalOutput + fee)} BTC
+Fee:        ${satToBtc(fee)}BTC
+Required(totalOutput+fee):   ${satToBtc(totalOutput + fee)} BTC
 Missing:    ${satToBtc(-changeValue)} BTC`);
     }
 
