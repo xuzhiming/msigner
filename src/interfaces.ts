@@ -111,6 +111,7 @@ export interface IListingState {
     buyerDummyUTXOs?: utxo[];
     buyerPaymentUTXOs?: utxo[]; // after the selection
     mergedSignedBuyingPSBTBase64?: string;
+    spend?: number;
   };
 }
 

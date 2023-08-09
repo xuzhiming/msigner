@@ -546,6 +546,7 @@ Missing:    ${satToBtc(-changeValue)} BTC`;
 
     listing.buyer.unsignedBuyingPSBTBase64 = psbt.toBase64();
     listing.buyer.unsignedBuyingPSBTInputSize = psbt.data.inputs.length;
+    listing.buyer.spend = fee + listing.seller.price + PLATFORM_FEE;
     return listing;
   }
 
