@@ -8,7 +8,7 @@ export const PLATFORM_FEE = 1000; //sats
 
 
 // Env
-export const BTC_NETWORK = process.env.REACT_APP_BTC_NETWORK || 'mainnet';
+export const BTC_NETWORK = process.env.REACT_APP_BTC_NETWORK || process.env.VITE_BTC_NETWORK || 'mainnet';
 export const ORDINALS_API_URL =
   BTC_NETWORK === 'mainnet'
     ? 'https://ordinals.com'
