@@ -366,10 +366,10 @@ Needed:       ${satToBtc(amount)} BTC`);
         const totalOutput = psbt.txOutputs.reduce((partialSum, a) => partialSum + a.value, 0);
         const changeValue = totalInput - totalOutput - fee;
         if (changeValue < 0) {
-            throw `Your wallet address doesn't have enough funds to buy this inscription.
+            throw new Error(`Your wallet address doesn't have enough funds to buy this inscription.
 Price:      ${satToBtc(listing.seller.price)} BTC
 Required:   ${satToBtc(totalOutput + fee)} BTC
-Missing:    ${satToBtc(-changeValue)} BTC`;
+Missing:    ${satToBtc(-changeValue)} BTC`);
         }
         // Change utxo
         if (changeValue > DUMMY_UTXO_MIN_VALUE) {
