@@ -329,8 +329,8 @@ Needed:       ${satToBtc(amount)} BTC`);
         psbt.addOutput({
             address: listing.buyer.buyerAddress,
             value: listing.buyer.buyerDummyUTXOs[0].value +
-                listing.buyer.buyerDummyUTXOs[1].value +
-                Number(listing.seller.ordItem.location.split(':')[2]),
+                listing.buyer.buyerDummyUTXOs[1].value
+            // + Number(listing.seller.ordItem.location.split(':')[2]),
         });
         // Add ordinal output
         psbt.addOutput({
@@ -380,6 +380,7 @@ Missing:    ${satToBtc(-changeValue)} BTC`;
         }
         listing.buyer.unsignedBuyingPSBTBase64 = psbt.toBase64();
         listing.buyer.unsignedBuyingPSBTInputSize = psbt.data.inputs.length;
+        listing.buyer.spend = fee + listing.seller.price + PLATFORM_FEE;
         return listing;
     }
     BuyerSigner.generateUnsignedBuyingPSBTBase64 = generateUnsignedBuyingPSBTBase64;

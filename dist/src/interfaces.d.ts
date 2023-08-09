@@ -93,6 +93,7 @@ export interface IListingState {
         buyerDummyUTXOs?: utxo[];
         buyerPaymentUTXOs?: utxo[];
         mergedSignedBuyingPSBTBase64?: string;
+        spend?: number;
     };
 }
 export interface utxo {

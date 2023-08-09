@@ -5,7 +5,7 @@ export const BUYING_PSBT_PLATFORM_FEE_INDEX = 3; // based on 2-dummy algo
 export const DELIST_MAGIC_PRICE = 20 * 1000000 * 100000000; // 20M BTC in sats
 export const PLATFORM_FEE = 1000; //sats
 // Env
-export const BTC_NETWORK = process.env.REACT_APP_BTC_NETWORK || 'mainnet';
+export const BTC_NETWORK = process.env.REACT_APP_BTC_NETWORK || process.env.VITE_BTC_NETWORK || 'mainnet';
 export const ORDINALS_API_URL = BTC_NETWORK === 'mainnet'
     ? 'https://ordinals.com'
     : 'https://explorer-signet.openordex.org';
