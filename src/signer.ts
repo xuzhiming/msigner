@@ -479,8 +479,8 @@ Needed:       ${satToBtc(amount)} BTC`);
       address: listing.buyer.buyerAddress,
       value:
         listing.buyer.buyerDummyUTXOs[0].value +
-        listing.buyer.buyerDummyUTXOs[1].value +
-        Number(listing.seller.ordItem.location.split(':')[2]),
+        listing.buyer.buyerDummyUTXOs[1].value 
+        // + Number(listing.seller.ordItem.location.split(':')[2]),
     });
 
     // Add ordinal output
