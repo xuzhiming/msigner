@@ -14,6 +14,12 @@ const network = BTC_NETWORK === 'mainnet'
 export async function getAddressUtxos(address) {
     return await getUtxosByAddress(address);
 }
+export async function getRecommendFees(feeRateTier) {
+    return await getFees(feeRateTier);
+}
+export function calculateTxFeeWithRate(vinsLength, voutsLength = 7, feeRate, includeChangeOutput = 1) {
+    return calculateTxBytesFeeWithRate(vinsLength, voutsLength, feeRate, includeChangeOutput);
+}
 export var SellerSigner;
 (function (SellerSigner) {
     async function generateUnsignedListingPSBTBase64(listing) {

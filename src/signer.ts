@@ -58,6 +58,24 @@ export async function getAddressUtxos(address: string) {
   return await getUtxosByAddress(address);
 }
 
+export async function getRecommendFees(feeRateTier: string) {
+  return await getFees(feeRateTier);
+}
+
+export function calculateTxFeeWithRate(
+  vinsLength: number,
+  voutsLength: number = 7,
+  feeRate: number,
+  includeChangeOutput: 0 | 1 = 1,
+): number {
+  return calculateTxBytesFeeWithRate(
+    vinsLength,
+    voutsLength,
+    feeRate,
+    includeChangeOutput,
+  );
+}
+
 export namespace SellerSigner {
   export async function generateUnsignedListingPSBTBase64(
     listing: IListingState,
