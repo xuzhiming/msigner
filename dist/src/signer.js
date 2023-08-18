@@ -20,7 +20,7 @@ export async function getRecommendedFees() {
 export async function getRecommendFee(feeRateTier) {
     return await getFees(feeRateTier);
 }
-export function calculateTxFeeWithRate(vinsLength, voutsLength = 7, feeRate, includeChangeOutput = 1) {
+export function calculateTxFeeWithRate(feeRate = 1, vinsLength = 4, voutsLength = 6, includeChangeOutput = 1) {
     return calculateTxBytesFeeWithRate(vinsLength, voutsLength, feeRate, includeChangeOutput);
 }
 export var SellerSigner;

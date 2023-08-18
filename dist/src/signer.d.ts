@@ -3,7 +3,7 @@ import { FeeProvider, IListingState, IOrdAPIPostPSBTBuying, IOrdAPIPostPSBTListi
 export declare function getAddressUtxos(address: string): Promise<AddressTxsUtxo[]>;
 export declare function getRecommendedFees(): Promise<import("@mempool/mempool.js/lib/interfaces/bitcoin/fees").FeesRecommended>;
 export declare function getRecommendFee(feeRateTier: string): Promise<number>;
-export declare function calculateTxFeeWithRate(vinsLength: number, voutsLength: number | undefined, feeRate: number, includeChangeOutput?: 0 | 1): number;
+export declare function calculateTxFeeWithRate(feeRate?: number, vinsLength?: number, voutsLength?: number, includeChangeOutput?: 0 | 1): number;
 export declare namespace SellerSigner {
     function generateUnsignedListingPSBTBase64(listing: IListingState): Promise<IListingState>;
     function verifySignedListingPSBTBase64(req: IOrdAPIPostPSBTListing, feeProvider: FeeProvider, itemProvider: ItemProvider): Promise<void>;

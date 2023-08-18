@@ -68,9 +68,9 @@ export async function getRecommendFee(feeRateTier: string) {
 }
 
 export function calculateTxFeeWithRate(
-  vinsLength: number,
-  voutsLength: number = 7,
-  feeRate: number,
+  feeRate: number = 1,
+  vinsLength: number = 4,
+  voutsLength: number = 6,
   includeChangeOutput: 0 | 1 = 1,
 ): number {
   return calculateTxBytesFeeWithRate(
