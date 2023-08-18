@@ -5,7 +5,7 @@ import { BTC_NETWORK, BUYING_PSBT_BUYER_RECEIVE_INDEX, BUYING_PSBT_PLATFORM_FEE_
 import { generateTxidFromHash, isP2SHAddress, mapUtxos, satToBtc, toXOnly, } from './util';
 import { calculateTxBytesFee, calculateTxBytesFeeWithRate, getSellerOrdOutputValue, } from './vendors/feeprovider';
 // import { FullnodeRPC } from './vendors/fullnoderpc';
-import { getFees, getTxHex, getTx, getTxStatus, getUtxosByAddress, } from './vendors/mempool';
+import { getFees, getTxHex, getTx, getTxStatus, getUtxosByAddress, getFeesRecommended, } from './vendors/mempool';
 import { InvalidArgumentError, } from './interfaces';
 bitcoin.initEccLib(ecc);
 const network = BTC_NETWORK === 'mainnet'
@@ -14,7 +14,10 @@ const network = BTC_NETWORK === 'mainnet'
 export async function getAddressUtxos(address) {
     return await getUtxosByAddress(address);
 }
-export async function getRecommendFees(feeRateTier) {
+export async function getRecommendedFees() {
+    return await getFeesRecommended();
+}
+export async function getRecommendFee(feeRateTier) {
     return await getFees(feeRateTier);
 }
 export function calculateTxFeeWithRate(vinsLength, voutsLength = 7, feeRate, includeChangeOutput = 1) {

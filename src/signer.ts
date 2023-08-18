@@ -34,6 +34,7 @@ import {
   getTx,
   getTxStatus,
   getUtxosByAddress,
+  getFeesRecommended,
 } from './vendors/mempool';
 import {
   FeeProvider,
@@ -58,7 +59,11 @@ export async function getAddressUtxos(address: string) {
   return await getUtxosByAddress(address);
 }
 
-export async function getRecommendFees(feeRateTier: string) {
+export async function getRecommendedFees() {
+  return await getFeesRecommended();
+}
+
+export async function getRecommendFee(feeRateTier: string) {
   return await getFees(feeRateTier);
 }
 
