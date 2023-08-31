@@ -357,7 +357,7 @@ Needed:       ${satToBtc(amount)} BTC`);
         // if (platformFeeValue > 0) {
         psbt.addOutput({
             address: listing.buyer.platAddress || PLATFORM_FEE_ADDRESS,
-            value: listing.buyer.platFee || PLATFORM_FEE,
+            value: listing.buyer.platFee,
         });
         // }
         // Create two new dummy utxo output for the next purchase
@@ -393,7 +393,7 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
         }
         listing.buyer.unsignedBuyingPSBTBase64 = psbt.toBase64();
         listing.buyer.unsignedBuyingPSBTInputSize = psbt.data.inputs.length;
-        listing.buyer.spend = fee + listing.seller.price + (listing.buyer.platFee || PLATFORM_FEE);
+        listing.buyer.spend = fee + listing.seller.price + listing.buyer.platFee;
         return listing;
     }
     BuyerSigner.generateUnsignedBuyingPSBTBase64 = generateUnsignedBuyingPSBTBase64;

@@ -95,7 +95,7 @@ export interface IListingState {
         mergedSignedBuyingPSBTBase64?: string;
         spend?: number;
         platAddress?: string;
-        platFee?: number;
+        platFee: number;
     };
 }
 export interface utxo {

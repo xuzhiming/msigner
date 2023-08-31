@@ -1,6 +1,6 @@
 import { TxStatus } from '@mempool/mempool.js/lib/interfaces/bitcoin/transactions';
 import * as bitcoin from 'bitcoinjs-lib';
-
+import { PLATFORM_FEE } from './constant';
 export class InvalidArgumentError extends Error {
   constructor(message: string) {
     super(message);
@@ -113,7 +113,7 @@ export interface IListingState {
     mergedSignedBuyingPSBTBase64?: string;
     spend?: number;
     platAddress?: string;
-    platFee?: number;
+    platFee: number;
   };
 }
 
