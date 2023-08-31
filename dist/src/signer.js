@@ -160,8 +160,8 @@ export var BuyerSigner;
     }
     BuyerSigner.selectDummyUTXOs = selectDummyUTXOs;
     async function selectPaymentUTXOs(utxos, amount, // amount is expected total output (except tx fee)
-    vinsLength, voutsLength, feeRateTier, itemProvider) {
-        amount += DUMMY_UTXO_VALUE * 2 + PLATFORM_FEE;
+    vinsLength, voutsLength, feeRateTier, itemProvider, platFee = PLATFORM_FEE) {
+        amount += DUMMY_UTXO_VALUE * 2 + platFee;
         const selectedUtxos = [];
         let selectedAmount = 0;
         // Sort descending by value, and filter out dummy utxos
@@ -356,8 +356,8 @@ Needed:       ${satToBtc(amount)} BTC`);
         //   platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 0;
         // if (platformFeeValue > 0) {
         psbt.addOutput({
-            address: PLATFORM_FEE_ADDRESS,
-            value: PLATFORM_FEE,
+            address: listing.buyer.platAddress || PLATFORM_FEE_ADDRESS,
+            value: listing.buyer.platFee || PLATFORM_FEE,
         });
         // }
         // Create two new dummy utxo output for the next purchase
@@ -393,7 +393,7 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
         }
         listing.buyer.unsignedBuyingPSBTBase64 = psbt.toBase64();
         listing.buyer.unsignedBuyingPSBTInputSize = psbt.data.inputs.length;
-        listing.buyer.spend = fee + listing.seller.price + PLATFORM_FEE;
+        listing.buyer.spend = fee + listing.seller.price + (listing.buyer.platFee || PLATFORM_FEE);
         return listing;
     }
     BuyerSigner.generateUnsignedBuyingPSBTBase64 = generateUnsignedBuyingPSBTBase64;

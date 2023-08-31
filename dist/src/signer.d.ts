@@ -12,7 +12,7 @@ export declare namespace BuyerSigner {
     function checkDummyUtxos(addressUtxos: AddressTxsUtxo[], itemProvider: ItemProvider): Promise<boolean>;
     function selectDummyUTXOs(utxos: AddressTxsUtxo[], itemProvider: ItemProvider): Promise<utxo[] | null>;
     function selectPaymentUTXOs(utxos: AddressTxsUtxo[], amount: number, // amount is expected total output (except tx fee)
-    vinsLength: number, voutsLength: number, feeRateTier: string, itemProvider: ItemProvider): Promise<utxo[]>;
+    vinsLength: number, voutsLength: number, feeRateTier: string, itemProvider: ItemProvider, platFee?: number): Promise<utxo[]>;
     function generateUnsignedBuyingPSBTBase64(listing: IListingState): Promise<IListingState>;
     function mergeSignedBuyingPSBTBase64(signedListingPSBTBase64: string, signedBuyingPSBTBase64: string): string;
     function verifySignedBuyingPSBTBase64(req: IOrdAPIPostPSBTBuying, feeProvider: FeeProvider, itemProvider: ItemProvider): Promise<{

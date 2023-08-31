@@ -94,6 +94,8 @@ export interface IListingState {
         buyerPaymentUTXOs?: utxo[];
         mergedSignedBuyingPSBTBase64?: string;
         spend?: number;
+        platAddress?: string;
+        platFee?: number;
     };
 }
 export interface utxo {
