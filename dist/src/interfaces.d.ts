@@ -73,6 +73,7 @@ export interface IOrdAPIPostPSBTListing {
 export interface IListingState {
     seller: {
         makerFeeBp: number;
+        makerAddress: string;
         sellerOrdAddress: string;
         price: number;
         ordItem: IOrdItem;
