@@ -61,6 +61,12 @@ export var SellerSigner;
             address: listing.seller.sellerReceiveAddress,
             value: sellerOutput,
         });
+        if (listing.seller.makerFeeBp > 0) {
+            psbt.addOutput({
+                address: listing.seller.makerAddress,
+                value: (listing.seller.price * listing.seller.makerFeeBp) / 100,
+            });
+        }
         listing.seller.unsignedListingPSBTBase64 = psbt.toBase64();
         return listing;
     }

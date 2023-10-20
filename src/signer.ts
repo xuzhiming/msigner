@@ -135,6 +135,13 @@ export namespace SellerSigner {
       value: sellerOutput,
     });
 
+    if (listing.seller.makerFeeBp > 0) {
+      psbt.addOutput({
+        address: listing.seller.makerAddress,
+        value: (listing.seller.price * listing.seller.makerFeeBp) / 100,
+      });
+    }
+
     listing.seller.unsignedListingPSBTBase64 = psbt.toBase64();
     return listing;
   }
@@ -534,7 +541,7 @@ Needed:       ${satToBtc(amount)} BTC`);
         value: (listing.seller.price * listing.seller.makerFeeBp) / 100,
       });
     }
-    
+
     // Create two new dummy utxo output for the next purchase
     psbt.addOutput({
       address: listing.buyer.buyerAddress,
