@@ -346,12 +346,6 @@ Needed:       ${satToBtc(amount)} BTC`);
             value: listing.seller.ordItem.outputValue,
         });
         psbt.addOutput(sellerOutput);
-        if (listing.seller.makerFeeBp > 0) {
-            psbt.addOutput({
-                address: listing.seller.makerAddress,
-                value: (listing.seller.price * listing.seller.makerFeeBp) / 100,
-            });
-        }
         // Create a platform fee output
         // let platformFeeValue = Math.floor(
         //   (listing.seller.price *
@@ -366,6 +360,12 @@ Needed:       ${satToBtc(amount)} BTC`);
             value: listing.buyer.platFee,
         });
         // }
+        if (listing.seller.makerFeeBp > 0) {
+            psbt.addOutput({
+                address: listing.seller.makerAddress,
+                value: (listing.seller.price * listing.seller.makerFeeBp) / 100,
+            });
+        }
         // Create two new dummy utxo output for the next purchase
         psbt.addOutput({
             address: listing.buyer.buyerAddress,
