@@ -116,6 +116,8 @@ export interface IListingState {
     platAddress?: string;
     platFee: number;
   };
+
+  isBidder?: boolean | false;
 }
 
 export interface utxo {

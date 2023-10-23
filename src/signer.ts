@@ -105,15 +105,20 @@ export namespace SellerSigner {
       }
     }
 
+    const sighashType =
+      bitcoin.Transaction.SIGHASH_SINGLE |
+      bitcoin.Transaction.SIGHASH_ANYONECANPAY;
+    // if (listing.isBidder) {
+    //   sighashType = bitcoin.Transaction.SIGHASH_ALL;
+    // }
+
     const input: any = {
       hash: ordinalUtxoTxId,
       index: parseInt(ordinalUtxoVout),
       nonWitnessUtxo: tx.toBuffer(),
       // No problem in always adding a witnessUtxo here
       witnessUtxo: tx.outs[parseInt(ordinalUtxoVout)],
-      sighashType:
-        bitcoin.Transaction.SIGHASH_SINGLE |
-        bitcoin.Transaction.SIGHASH_ANYONECANPAY,
+      sighashType: sighashType,
     };
     // If taproot is used, we need to add the internal key
     if (listing.seller.tapInternalKey) {
@@ -424,12 +429,20 @@ Needed:       ${satToBtc(amount)} BTC`);
 
     let totalInput = 0;
 
+    let sighashType = bitcoin.Transaction.SIGHASH_ALL;
+    if (listing.isBidder) {
+      sighashType =
+        bitcoin.Transaction.SIGHASH_SINGLE |
+        bitcoin.Transaction.SIGHASH_ANYONECANPAY;
+    }
+
     // Add two dummyUtxos
     for (const dummyUtxo of listing.buyer.buyerDummyUTXOs) {
       const input: any = {
         hash: dummyUtxo.txid,
         index: dummyUtxo.vout,
         nonWitnessUtxo: dummyUtxo.tx.toBuffer(),
+        sighashType: sighashType,
       };
 
       const p2shInputRedeemScript: any = {};
@@ -472,6 +485,7 @@ Needed:       ${satToBtc(amount)} BTC`);
         hash: utxo.txid,
         index: utxo.vout,
         nonWitnessUtxo: utxo.tx.toBuffer(),
+        sighashType: sighashType,
       };
 
       const p2shInputWitnessUTXOUn: any = {};
