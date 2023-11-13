@@ -89,7 +89,7 @@ export interface IOrdAPIPostPSBTListing {
 
 export interface IListingState {
   seller: {
-    makerFeeBp: number;
+    makerFeeBp?: number | 0;
     makerAddress: string;
     sellerOrdAddress: string;
     price: number;

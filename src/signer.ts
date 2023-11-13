@@ -129,9 +129,11 @@ export namespace SellerSigner {
 
     psbt.addInput(input);
 
+    const makerBp = listing.seller.makerFeeBp || 0;
+
     const sellerOutput = getSellerOrdOutputValue(
       listing.seller.price,
-      listing.seller.makerFeeBp,
+      makerBp,
       listing.seller.ordItem.outputValue,
     );
 
@@ -140,10 +142,10 @@ export namespace SellerSigner {
       value: sellerOutput,
     });
 
-    if (listing.seller.makerFeeBp > 0) {
+    if (makerBp > 0) {
       psbt.addOutput({
         address: listing.seller.makerAddress,
-        value: (listing.seller.price * listing.seller.makerFeeBp) / 100,
+        value: (listing.seller.price * makerBp) / 100,
       });
     }
 
@@ -399,7 +401,7 @@ Needed:       ${satToBtc(amount)} BTC`);
         address: listing.seller.sellerReceiveAddress,
         value: getSellerOrdOutputValue(
           listing.seller.price,
-          listing.seller.makerFeeBp,
+          listing.seller.makerFeeBp || 0,
           listing.seller.ordItem.outputValue,
         ),
       },
@@ -549,10 +551,11 @@ Needed:       ${satToBtc(amount)} BTC`);
     });
     // }
 
-    if (listing.seller.makerFeeBp > 0) {
+    const makeBp = listing.seller.makerFeeBp || 0;
+    if (makeBp > 0) {
       psbt.addOutput({
         address: listing.seller.makerAddress,
-        value: (listing.seller.price * listing.seller.makerFeeBp) / 100,
+        value: (listing.seller.price * makeBp) / 100,
       });
     }
 

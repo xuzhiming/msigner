@@ -60,15 +60,16 @@ export var SellerSigner;
             input.tapInternalKey = toXOnly(tx.toBuffer().constructor(listing.seller.tapInternalKey, 'hex'));
         }
         psbt.addInput(input);
-        const sellerOutput = getSellerOrdOutputValue(listing.seller.price, listing.seller.makerFeeBp, listing.seller.ordItem.outputValue);
+        const makerBp = listing.seller.makerFeeBp || 0;
+        const sellerOutput = getSellerOrdOutputValue(listing.seller.price, makerBp, listing.seller.ordItem.outputValue);
         psbt.addOutput({
             address: listing.seller.sellerReceiveAddress,
             value: sellerOutput,
         });
-        if (listing.seller.makerFeeBp > 0) {
+        if (makerBp > 0) {
             psbt.addOutput({
                 address: listing.seller.makerAddress,
-                value: (listing.seller.price * listing.seller.makerFeeBp) / 100,
+                value: (listing.seller.price * makerBp) / 100,
             });
         }
         listing.seller.unsignedListingPSBTBase64 = psbt.toBase64();
@@ -259,7 +260,7 @@ Needed:       ${satToBtc(amount)} BTC`);
             sellerInput,
             sellerOutput: {
                 address: listing.seller.sellerReceiveAddress,
-                value: getSellerOrdOutputValue(listing.seller.price, listing.seller.makerFeeBp, listing.seller.ordItem.outputValue),
+                value: getSellerOrdOutputValue(listing.seller.price, listing.seller.makerFeeBp || 0, listing.seller.ordItem.outputValue),
             },
         };
         return ret;
@@ -378,10 +379,11 @@ Needed:       ${satToBtc(amount)} BTC`);
             value: listing.buyer.platFee,
         });
         // }
-        if (listing.seller.makerFeeBp > 0) {
+        const makeBp = listing.seller.makerFeeBp || 0;
+        if (makeBp > 0) {
             psbt.addOutput({
                 address: listing.seller.makerAddress,
-                value: (listing.seller.price * listing.seller.makerFeeBp) / 100,
+                value: (listing.seller.price * makeBp) / 100,
             });
         }
         // Create two new dummy utxo output for the next purchase
