@@ -171,17 +171,19 @@ export var BuyerSigner;
     }
     BuyerSigner.selectDummyUTXOs = selectDummyUTXOs;
     async function selectPaymentUTXOs(utxos, amount, // amount is expected total output (except tx fee)
-    vinsLength, voutsLength, feeRateTier, itemProvider, platFee = PLATFORM_FEE) {
+    vinsLength, voutsLength, feeRateTier, itemProvider, platFee = PLATFORM_FEE, dummyUtxos) {
         amount += DUMMY_UTXO_VALUE * 2 + platFee;
         const selectedUtxos = [];
         let selectedAmount = 0;
         // Sort descending by value, and filter out dummy utxos
-        utxos = utxos
-            .filter((x) => x.value > DUMMY_UTXO_VALUE)
-            .sort((a, b) => b.value - a.value);
+        utxos = utxos.sort((a, b) => b.value - a.value);
         for (const utxo of utxos) {
             // Never spend a utxo that contains an inscription for cardinal purposes
             if (await doesUtxoContainInscription(utxo, itemProvider)) {
+                continue;
+            }
+            if (dummyUtxos.filter((x) => x.txid == utxo.txid && x.vout == utxo.vout)
+                .length == 1) {
                 continue;
             }
             selectedUtxos.push(utxo);
