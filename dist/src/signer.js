@@ -1,7 +1,7 @@
 import * as bitcoin from 'bitcoinjs-lib';
 // import * as ecc from 'tiny-secp256k1';
 import * as ecc from '@bitcoinerlab/secp256k1';
-import { BTC_NETWORK, BUYING_PSBT_BUYER_RECEIVE_INDEX, BUYING_PSBT_PLATFORM_FEE_INDEX, BUYING_PSBT_SELLER_SIGNATURE_INDEX, DUMMY_UTXO_MAX_VALUE, DUMMY_UTXO_MIN_VALUE, DUMMY_UTXO_VALUE, ORDINALS_POSTAGE_VALUE, PLATFORM_FEE, PLATFORM_FEE_ADDRESS, } from './constant';
+import { BTC_NETWORK, BUYING_PSBT_BUYER_RECEIVE_INDEX, BUYING_PSBT_PLATFORM_FEE_INDEX, BUYING_PSBT_SELLER_SIGNATURE_INDEX, DUMMY_UTXO_MIN_VALUE, DUMMY_UTXO_VALUE, ORDINALS_POSTAGE_VALUE, PLATFORM_FEE, PLATFORM_FEE_ADDRESS, } from './constant';
 import { generateTxidFromHash, isP2SHAddress, mapUtxos, satToBtc, toXOnly, } from './util';
 import { calculateTxBytesFee, calculateTxBytesFeeWithRate, getSellerOrdOutputValue, } from './vendors/feeprovider';
 // import { FullnodeRPC } from './vendors/fullnoderpc';
@@ -141,8 +141,7 @@ export var BuyerSigner;
     async function checkDummyUtxos(addressUtxos, itemProvider) {
         let dummyCount = 0;
         for (const utxoFromMempool of addressUtxos) {
-            if (utxoFromMempool.value >= DUMMY_UTXO_MIN_VALUE &&
-                utxoFromMempool.value <= DUMMY_UTXO_MAX_VALUE) {
+            if (utxoFromMempool.value == DUMMY_UTXO_VALUE) {
                 if (await doesUtxoContainInscription(utxoFromMempool, itemProvider)) {
                     continue;
                 }
@@ -160,8 +159,7 @@ export var BuyerSigner;
             if (await doesUtxoContainInscription(utxo, itemProvider)) {
                 continue;
             }
-            if (utxo.value >= DUMMY_UTXO_MIN_VALUE &&
-                utxo.value <= DUMMY_UTXO_MAX_VALUE) {
+            if (utxo.value == DUMMY_UTXO_VALUE) {
                 result.push((await mapUtxos([utxo]))[0]);
                 if (result.length === 2)
                     return result;
@@ -195,7 +193,7 @@ export var BuyerSigner;
         }
         if (selectedAmount < amount) {
             throw new InvalidArgumentError(`Not enough cardinal spendable funds.
-Address has:  ${satToBtc(selectedAmount)} BTC
+Address has:  ${satToBtc(selectedAmount + DUMMY_UTXO_VALUE * 2)} BTC
 Needed:       ${satToBtc(amount)} BTC`);
         }
         return await mapUtxos(selectedUtxos);
@@ -413,7 +411,8 @@ Required(totalOutput+fee):   ${satToBtc(totalOutput + fee)} BTC
 Missing:    ${satToBtc(-changeValue)} BTC`);
         }
         // Change utxo
-        if (changeValue > DUMMY_UTXO_MIN_VALUE) {
+        // if (changeValue > DUMMY_UTXO_MIN_VALUE) 
+        {
             psbt.addOutput({
                 address: listing.buyer.buyerAddress,
                 value: changeValue,
@@ -585,7 +584,8 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
             value: DUMMY_UTXO_VALUE,
         });
         // to avoid dust
-        if (changeValue > DUMMY_UTXO_MIN_VALUE) {
+        // if (changeValue > DUMMY_UTXO_MIN_VALUE) 
+        {
             psbt.addOutput({
                 address,
                 value: changeValue,

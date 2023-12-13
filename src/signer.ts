@@ -244,10 +244,7 @@ export namespace BuyerSigner {
   ): Promise<boolean> {
     let dummyCount = 0;
     for (const utxoFromMempool of addressUtxos) {
-      if (
-        utxoFromMempool.value >= DUMMY_UTXO_MIN_VALUE &&
-        utxoFromMempool.value <= DUMMY_UTXO_MAX_VALUE
-      ) {
+      if (utxoFromMempool.value == DUMMY_UTXO_VALUE) {
         if (await doesUtxoContainInscription(utxoFromMempool, itemProvider)) {
           continue;
         }
@@ -269,10 +266,7 @@ export namespace BuyerSigner {
         continue;
       }
 
-      if (
-        utxo.value >= DUMMY_UTXO_MIN_VALUE &&
-        utxo.value <= DUMMY_UTXO_MAX_VALUE
-      ) {
+      if (utxo.value == DUMMY_UTXO_VALUE) {
         result.push((await mapUtxos([utxo]))[0]);
         if (result.length === 2) return result;
       }
@@ -325,7 +319,7 @@ export namespace BuyerSigner {
 
     if (selectedAmount < amount) {
       throw new InvalidArgumentError(`Not enough cardinal spendable funds.
-Address has:  ${satToBtc(selectedAmount)} BTC
+Address has:  ${satToBtc(selectedAmount + DUMMY_UTXO_VALUE * 2)} BTC
 Needed:       ${satToBtc(amount)} BTC`);
     }
 
@@ -599,7 +593,8 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
     }
 
     // Change utxo
-    if (changeValue > DUMMY_UTXO_MIN_VALUE) {
+    // if (changeValue > DUMMY_UTXO_MIN_VALUE) 
+    {
       psbt.addOutput({
         address: listing.buyer.buyerAddress,
         value: changeValue,
@@ -852,7 +847,8 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
     });
 
     // to avoid dust
-    if (changeValue > DUMMY_UTXO_MIN_VALUE) {
+    // if (changeValue > DUMMY_UTXO_MIN_VALUE) 
+    {
       psbt.addOutput({
         address,
         value: changeValue,
