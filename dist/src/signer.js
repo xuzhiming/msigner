@@ -172,7 +172,7 @@ export var BuyerSigner;
     vinsLength, voutsLength, feeRateTier, itemProvider, platFee = PLATFORM_FEE, dummyUtxos) {
         amount += DUMMY_UTXO_VALUE * 2 + platFee;
         const selectedUtxos = [];
-        let selectedAmount = 0;
+        let selectedAmount = DUMMY_UTXO_VALUE * 2;
         // Sort descending by value, and filter out dummy utxos
         utxos = utxos.sort((a, b) => b.value - a.value);
         for (const utxo of utxos) {
@@ -193,7 +193,7 @@ export var BuyerSigner;
         }
         if (selectedAmount < amount) {
             throw new InvalidArgumentError(`Not enough cardinal spendable funds.
-Address has:  ${satToBtc(selectedAmount + DUMMY_UTXO_VALUE * 2)} BTC
+Address has:  ${satToBtc(selectedAmount)} BTC
 Needed:       ${satToBtc(amount)} BTC`);
         }
         return await mapUtxos(selectedUtxos);

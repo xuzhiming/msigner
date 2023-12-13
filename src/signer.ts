@@ -288,7 +288,7 @@ export namespace BuyerSigner {
     amount += DUMMY_UTXO_VALUE * 2 + platFee;
 
     const selectedUtxos = [];
-    let selectedAmount = 0;
+    let selectedAmount =  DUMMY_UTXO_VALUE * 2;
 
     // Sort descending by value, and filter out dummy utxos
     utxos = utxos.sort((a, b) => b.value - a.value);
@@ -319,7 +319,7 @@ export namespace BuyerSigner {
 
     if (selectedAmount < amount) {
       throw new InvalidArgumentError(`Not enough cardinal spendable funds.
-Address has:  ${satToBtc(selectedAmount + DUMMY_UTXO_VALUE * 2)} BTC
+Address has:  ${satToBtc(selectedAmount)} BTC
 Needed:       ${satToBtc(amount)} BTC`);
     }
 
