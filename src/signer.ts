@@ -283,12 +283,12 @@ export namespace BuyerSigner {
     feeRateTier: string,
     itemProvider: ItemProvider,
     platFee: number = PLATFORM_FEE,
-    dummyUtxos: AddressTxsUtxo[],
+    dummyUtxos: AddressTxsUtxo[] = [],
   ) {
-    amount += DUMMY_UTXO_VALUE * 2 + platFee;
+    amount += DUMMY_UTXO_VALUE * 4 + platFee;
 
     const selectedUtxos = [];
-    let selectedAmount =  DUMMY_UTXO_VALUE * 2;
+    let selectedAmount = DUMMY_UTXO_VALUE * 2;
 
     // Sort descending by value, and filter out dummy utxos
     utxos = utxos.sort((a, b) => b.value - a.value);
@@ -299,6 +299,7 @@ export namespace BuyerSigner {
         continue;
       }
       if (
+        dummyUtxos.length > 0 &&
         dummyUtxos.filter((x) => x.txid == utxo.txid && x.vout == utxo.vout)
           .length == 1
       ) {
@@ -593,7 +594,7 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
     }
 
     // Change utxo
-    // if (changeValue > DUMMY_UTXO_MIN_VALUE) 
+    // if (changeValue > DUMMY_UTXO_MIN_VALUE)
     {
       psbt.addOutput({
         address: listing.buyer.buyerAddress,
@@ -847,7 +848,7 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
     });
 
     // to avoid dust
-    // if (changeValue > DUMMY_UTXO_MIN_VALUE) 
+    // if (changeValue > DUMMY_UTXO_MIN_VALUE)
     {
       psbt.addOutput({
         address,

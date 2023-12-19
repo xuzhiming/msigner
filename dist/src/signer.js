@@ -169,8 +169,8 @@ export var BuyerSigner;
     }
     BuyerSigner.selectDummyUTXOs = selectDummyUTXOs;
     async function selectPaymentUTXOs(utxos, amount, // amount is expected total output (except tx fee)
-    vinsLength, voutsLength, feeRateTier, itemProvider, platFee = PLATFORM_FEE, dummyUtxos) {
-        amount += DUMMY_UTXO_VALUE * 2 + platFee;
+    vinsLength, voutsLength, feeRateTier, itemProvider, platFee = PLATFORM_FEE, dummyUtxos = []) {
+        amount += DUMMY_UTXO_VALUE * 4 + platFee;
         const selectedUtxos = [];
         let selectedAmount = DUMMY_UTXO_VALUE * 2;
         // Sort descending by value, and filter out dummy utxos
@@ -180,8 +180,9 @@ export var BuyerSigner;
             if (await doesUtxoContainInscription(utxo, itemProvider)) {
                 continue;
             }
-            if (dummyUtxos.filter((x) => x.txid == utxo.txid && x.vout == utxo.vout)
-                .length == 1) {
+            if (dummyUtxos.length > 0 &&
+                dummyUtxos.filter((x) => x.txid == utxo.txid && x.vout == utxo.vout)
+                    .length == 1) {
                 continue;
             }
             selectedUtxos.push(utxo);
@@ -411,7 +412,7 @@ Required(totalOutput+fee):   ${satToBtc(totalOutput + fee)} BTC
 Missing:    ${satToBtc(-changeValue)} BTC`);
         }
         // Change utxo
-        // if (changeValue > DUMMY_UTXO_MIN_VALUE) 
+        // if (changeValue > DUMMY_UTXO_MIN_VALUE)
         {
             psbt.addOutput({
                 address: listing.buyer.buyerAddress,
@@ -584,7 +585,7 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
             value: DUMMY_UTXO_VALUE,
         });
         // to avoid dust
-        // if (changeValue > DUMMY_UTXO_MIN_VALUE) 
+        // if (changeValue > DUMMY_UTXO_MIN_VALUE)
         {
             psbt.addOutput({
                 address,
