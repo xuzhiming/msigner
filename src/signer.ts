@@ -305,6 +305,9 @@ export namespace BuyerSigner {
       ) {
         continue;
       }
+      if (utxo.vout < DUMMY_UTXO_VALUE) {
+        continue;
+      }
       selectedUtxos.push(utxo);
       selectedAmount += utxo.value;
 
@@ -319,7 +322,7 @@ export namespace BuyerSigner {
     }
 
     if (selectedAmount < amount) {
-      throw new InvalidArgumentError(`Not enough cardinal spendable funds.
+      throw new InvalidArgumentError(`Not enough cardinal spendable funds or too many dust utxo.
 Address has:  ${satToBtc(selectedAmount)} BTC
 Needed:       ${satToBtc(amount)} BTC`);
     }
