@@ -305,7 +305,7 @@ export namespace BuyerSigner {
       ) {
         continue;
       }
-      if (utxo.vout < DUMMY_UTXO_VALUE) {
+      if (utxo.value < DUMMY_UTXO_VALUE) {
         continue;
       }
       selectedUtxos.push(utxo);

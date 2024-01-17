@@ -185,7 +185,7 @@ export var BuyerSigner;
                     .length == 1) {
                 continue;
             }
-            if (utxo.vout < DUMMY_UTXO_VALUE) {
+            if (utxo.value < DUMMY_UTXO_VALUE) {
                 continue;
             }
             selectedUtxos.push(utxo);
