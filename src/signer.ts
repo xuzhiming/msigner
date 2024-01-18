@@ -572,7 +572,7 @@ Needed:       ${satToBtc(amount)} BTC`);
     });
     const fee = calculateTxBytesFeeWithRate(
       psbt.txInputs.length,
-      psbt.txOutputs.length,
+      psbt.txOutputs.length + 1,
       listing.buyer.feeRate,
     );
     // const fee = await calculateTxBytesFee(

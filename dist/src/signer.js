@@ -399,7 +399,7 @@ Needed:       ${satToBtc(amount)} BTC`);
             address: listing.buyer.buyerAddress,
             value: DUMMY_UTXO_VALUE,
         });
-        const fee = calculateTxBytesFeeWithRate(psbt.txInputs.length, psbt.txOutputs.length, listing.buyer.feeRate);
+        const fee = calculateTxBytesFeeWithRate(psbt.txInputs.length, psbt.txOutputs.length + 1, listing.buyer.feeRate);
         // const fee = await calculateTxBytesFee(
         //   psbt.txInputs.length,
         //   psbt.txOutputs.length, // already taken care of the exchange output bytes calculation
