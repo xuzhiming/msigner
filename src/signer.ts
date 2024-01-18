@@ -262,11 +262,10 @@ export namespace BuyerSigner {
   ): Promise<utxo[] | null> {
     const result = [];
     for (const utxo of utxos) {
-      if (await doesUtxoContainInscription(utxo, itemProvider)) {
-        continue;
-      }
-
       if (utxo.value == DUMMY_UTXO_VALUE) {
+        if (await doesUtxoContainInscription(utxo, itemProvider)) {
+          continue;
+        }
         result.push((await mapUtxos([utxo]))[0]);
         if (result.length === 2) return result;
       }
