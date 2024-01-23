@@ -1,4 +1,3 @@
-import { RPCClient } from 'rpc-bitcoin';
 export type IAnalyzePSBTResult = {
     inputs: {
         has_utxo: boolean;
@@ -38,17 +37,12 @@ export type IGetRawTransactionVerboseResult = {
         n: number;
     }[];
 };
-export declare class FullnodeRPC {
-    static getClient(): RPCClient;
+export declare class ProxyRPC {
+    proxyUri: string;
+    constructor(uri: string);
+    getrawtransaction(params: {}): Promise<any>;
+    static getClient(): ProxyRPC;
     static getrawtransaction(txid: string): Promise<string>;
     static getrawtransactionVerbose(txid: string): Promise<IGetRawTransactionVerboseResult>;
-    static analyzepsbt(psbt: string): Promise<IAnalyzePSBTResult>;
-    static finalizepsbt(psbt: string): Promise<{
-        hex: string;
-        complete: boolean;
-    }>;
-    static testmempoolaccept(rawtxs: string[]): Promise<ITestMempoolAcceptResult>;
-    static sendrawtransaction(rawtx: string): Promise<string>;
-    static getrawmempool(): Promise<string[]>;
 }
 //# sourceMappingURL=fullnoderpc.d.ts.map

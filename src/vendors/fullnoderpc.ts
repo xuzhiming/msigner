@@ -1,4 +1,5 @@
-import { RPCClient } from 'rpc-bitcoin';
+// import { RPCClient } from 'rpc-bitcoin';
+import axios, { Axios } from 'axios';
 import {
   BITCOIN_RPC_HOST,
   BITCOIN_RPC_PASS,
@@ -7,7 +8,8 @@ import {
   BITCOIN_RPC_USER,
 } from '../constant';
 
-let client: RPCClient | undefined;
+// let client: RPCClient | undefined;
+let proxyClient: ProxyRPC | undefined;
 
 export type IAnalyzePSBTResult = {
   inputs: {
@@ -50,6 +52,41 @@ export type IGetRawTransactionVerboseResult = {
     n: number;
   }[];
 };
+
+export class ProxyRPC {
+  proxyUri: string;
+  constructor(uri: string) {
+    this.proxyUri = uri;
+  }
+  async getrawtransaction(params: {}): Promise<any> {
+    const resp = await axios.post(this.proxyUri, {
+      method: 'getrawtransaction',
+      params: params,
+    });
+    return resp.data.result;
+  }
+
+  static getClient(): ProxyRPC {
+    if (proxyClient) return proxyClient;
+    proxyClient = new ProxyRPC('http://localhost:30000/rpcProxy');
+    return proxyClient;
+  }
+  static async getrawtransaction(txid: string): Promise<string> {
+    const client = this.getClient();
+    const res = await client.getrawtransaction({ txid });
+    return res as string;
+  }
+
+  static async getrawtransactionVerbose(
+    txid: string,
+  ): Promise<IGetRawTransactionVerboseResult> {
+    const client = this.getClient();
+    const res = await client.getrawtransaction({ txid, verbose: true });
+    return res;
+  }
+}
+/*
+ * 
 
 export class FullnodeRPC {
   static getClient(): RPCClient {
@@ -110,3 +147,4 @@ export class FullnodeRPC {
     return res;
   }
 }
+ */

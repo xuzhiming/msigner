@@ -29,10 +29,10 @@ export const ORDINALS_POSTAGE_VALUE = Number(
   process.env.ORDINALS_POSTAGE_VALUE ?? 10000,
 );
 export const BITCOIN_RPC_HOST =
-  process.env.BITCOIN_RPC_HOST || 'http://localhost';
-export const BITCOIN_RPC_PORT = Number(process.env.BITCOIN_RPC_PORT ?? 38332);
-export const BITCOIN_RPC_USER = process.env.BITCOIN_RPC_USER || '__cookie__';
-export const BITCOIN_RPC_PASS = process.env.BITCOIN_RPC_PASS || '';
+  process.env.VITE_BITCOIN_RPC_HOST || 'http://localhost';
+export const BITCOIN_RPC_PORT = Number(process.env.VITE_BITCOIN_RPC_PORT ?? 38332);
+export const BITCOIN_RPC_USER = process.env.VITE_BITCOIN_RPC_USER || '__cookie__';
+export const BITCOIN_RPC_PASS = process.env.VITE_BITCOIN_RPC_PASS || '';
 export const BITCOIN_RPC_TIMEOUT = Number(
-  process.env.BITCOIN_RPC_TIMEOUT ?? 120000,
+  process.env.VITE_BITCOIN_RPC_TIMEOUT ?? 120000,
 );

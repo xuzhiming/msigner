@@ -1,7 +1,7 @@
 import { AddressTxsUtxo } from '@mempool/mempool.js/lib/interfaces/bitcoin/addresses';
 import * as bitcoin from 'bitcoinjs-lib';
 import { utxo } from './interfaces';
-// import { FullnodeRPC } from './vendors/fullnoderpc';
+import { ProxyRPC } from './vendors/fullnoderpc';
 import { getTxHex } from './vendors/mempool';
 
 export const toXOnly = (pubKey: Buffer) =>
@@ -25,8 +25,8 @@ export async function mapUtxos(
       value: utxoFromMempool.value,
       status: utxoFromMempool.status,
       tx: bitcoin.Transaction.fromHex(
-        // await FullnodeRPC.getrawtransaction(utxoFromMempool.txid),
-        await getTxHex(utxoFromMempool.txid),
+        await ProxyRPC.getrawtransaction(utxoFromMempool.txid),
+        // await getTxHex(utxoFromMempool.txid),
       ),
     });
   }
