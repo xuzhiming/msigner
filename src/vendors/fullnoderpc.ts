@@ -1,6 +1,7 @@
 // import { RPCClient } from 'rpc-bitcoin';
 import axios, { Axios } from 'axios';
 import {
+  BTC_NETWORK,
   BITCOIN_RPC_HOST,
   BITCOIN_RPC_PASS,
   BITCOIN_RPC_PORT,
@@ -60,6 +61,7 @@ export class ProxyRPC {
   }
   async getrawtransaction(params: {}): Promise<any> {
     const resp = await axios.post(this.proxyUri, {
+      isMainNet: BTC_NETWORK === 'mainnet',
       method: 'getrawtransaction',
       params: params,
     });
