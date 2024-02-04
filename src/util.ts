@@ -25,8 +25,8 @@ export async function mapUtxos(
       value: utxoFromMempool.value,
       status: utxoFromMempool.status,
       tx: bitcoin.Transaction.fromHex(
-        // await ProxyRPC.getrawtransaction(utxoFromMempool.txid),
-        await getTxHex(utxoFromMempool.txid),
+        await ProxyRPC.getrawtransaction(utxoFromMempool.txid),
+        // await getTxHex(utxoFromMempool.txid),
       ),
     });
   }

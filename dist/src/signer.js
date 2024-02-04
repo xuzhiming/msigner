@@ -4,7 +4,8 @@ import * as ecc from '@bitcoinerlab/secp256k1';
 import { BTC_NETWORK, BUYING_PSBT_BUYER_RECEIVE_INDEX, BUYING_PSBT_PLATFORM_FEE_INDEX, BUYING_PSBT_SELLER_SIGNATURE_INDEX, DUMMY_UTXO_MIN_VALUE, DUMMY_UTXO_VALUE, ORDINALS_POSTAGE_VALUE, PLATFORM_FEE, PLATFORM_FEE_ADDRESS, } from './constant';
 import { generateTxidFromHash, isP2SHAddress, mapUtxos, satToBtc, toXOnly, } from './util';
 import { calculateTxBytesFee, calculateTxBytesFeeWithRate, getSellerOrdOutputValue, } from './vendors/feeprovider';
-import { getFees, getTxHex, getTx, getTxStatus, getUtxosByAddress, getFeesRecommended, } from './vendors/mempool';
+import { ProxyRPC } from './vendors/fullnoderpc';
+import { getFees, getTxHex, getUtxosByAddress, getFeesRecommended, } from './vendors/mempool';
 import { InvalidArgumentError, } from './interfaces';
 bitcoin.initEccLib(ecc);
 const network = BTC_NETWORK === 'mainnet'
@@ -27,11 +28,7 @@ export var SellerSigner;
     async function generateUnsignedListingPSBTBase64(listing) {
         const psbt = new bitcoin.Psbt({ network });
         const [ordinalUtxoTxId, ordinalUtxoVout] = listing.seller.ordItem.output.split(':');
-        const tx = bitcoin.Transaction.fromHex(
-        // await ProxyRPC.getrawtransaction(
-        // listing.seller.ordItem.output.split(':')[0]
-        // ),
-        await getTxHex(listing.seller.ordItem.output.split(':')[0]));
+        const tx = bitcoin.Transaction.fromHex(await ProxyRPC.getrawtransaction(listing.seller.ordItem.output.split(':')[0]));
         // No need to add this witness if the seller is using taproot
         if (!listing.seller.tapInternalKey) {
             for (const output in tx.outs) {
@@ -214,20 +211,18 @@ Needed:       ${satToBtc(amount)} BTC`);
             }
         }
         // if it's not confirmed, we search the input script for the inscription
-        const tx = await getTx(utxo.txid);
-        // await ProxyRPC.getrawtransactionVerbose(utxo.txid);
+        const tx = //await getTx(utxo.txid);
+         await ProxyRPC.getrawtransactionVerbose(utxo.txid);
         let foundInscription = false;
         console.log('check txid:', utxo.txid);
         for (const input of tx.vin) {
-            if ((await getTxStatus(input.txid)).confirmed === false) {
-                return true; // to error on the safer side, and treat this as possible to have a inscription
-            }
-            // if (
-            //   (await ProxyRPC.getrawtransactionVerbose(input.txid))
-            //     .confirmations === 0
-            // ) {
+            // if ((await getTxStatus(input.txid)).confirmed === false) {
             //   return true; // to error on the safer side, and treat this as possible to have a inscription
             // }
+            if ((await ProxyRPC.getrawtransactionVerbose(input.txid))
+                .confirmations === 0) {
+                return true; // to error on the safer side, and treat this as possible to have a inscription
+            }
             const previousOutput = `${input.txid}:${input.vout}`;
             try {
                 if ((await itemProvider.getTokenByOutput(previousOutput)) !== null) {
@@ -243,9 +238,7 @@ Needed:       ${satToBtc(amount)} BTC`);
     }
     async function getSellerInputAndOutput(listing) {
         const [ordinalUtxoTxId, ordinalUtxoVout] = listing.seller.ordItem.output.split(':');
-        const tx = bitcoin.Transaction.fromHex(
-        // await ProxyRPC.getrawtransaction(ordinalUtxoTxId),
-        await getTxHex(ordinalUtxoTxId));
+        const tx = bitcoin.Transaction.fromHex(await ProxyRPC.getrawtransaction(ordinalUtxoTxId));
         // No need to add this witness if the seller is using taproot
         if (!listing.seller.tapInternalKey) {
             for (let outputIndex = 0; outputIndex < tx.outs.length; outputIndex++) {

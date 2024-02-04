@@ -8,17 +8,21 @@ export class ProxyRPC {
         this.proxyUri = uri;
     }
     async getrawtransaction(params) {
-        const resp = await axios.post(this.proxyUri, {
-            isMainNet: BTC_NETWORK === 'mainnet',
-            method: 'getrawtransaction',
-            params: params,
-        });
+        const form = new FormData();
+        form.append('isMainNet', '' + (BTC_NETWORK === 'mainnet'));
+        form.append('method', 'getrawtransaction');
+        form.append('params', JSON.stringify(params));
+        const resp = await axios.post(this.proxyUri, form);
         return resp.data.result;
     }
     static getClient() {
         if (proxyClient)
             return proxyClient;
-        proxyClient = new ProxyRPC('http://localhost:30000/rpcProxy');
+        let url = 'https://sandbox-api.bidder.art/rare/proxy/rpcProxy';
+        if (BTC_NETWORK === 'mainnet') {
+            url = 'https://api.bidder.art/rare/proxy/rpcProxy';
+        }
+        proxyClient = new ProxyRPC(url);
         return proxyClient;
     }
     static async getrawtransaction(txid) {

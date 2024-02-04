@@ -90,10 +90,10 @@ export namespace SellerSigner {
       listing.seller.ordItem.output.split(':');
 
     const tx = bitcoin.Transaction.fromHex(
-      // await ProxyRPC.getrawtransaction(
-      // listing.seller.ordItem.output.split(':')[0]
-      // ),
-      await getTxHex(listing.seller.ordItem.output.split(':')[0]),
+      await ProxyRPC.getrawtransaction(
+      listing.seller.ordItem.output.split(':')[0]
+      ),
+      // await getTxHex(listing.seller.ordItem.output.split(':')[0]),
     );
 
     // No need to add this witness if the seller is using taproot
@@ -346,20 +346,20 @@ Needed:       ${satToBtc(amount)} BTC`);
     }
 
     // if it's not confirmed, we search the input script for the inscription
-    const tx = await getTx(utxo.txid);
-    // await ProxyRPC.getrawtransactionVerbose(utxo.txid);
+    const tx = //await getTx(utxo.txid);
+    await ProxyRPC.getrawtransactionVerbose(utxo.txid);
     let foundInscription = false;
     console.log('check txid:', utxo.txid);
     for (const input of tx.vin) {
-      if ((await getTxStatus(input.txid)).confirmed === false) {
-        return true; // to error on the safer side, and treat this as possible to have a inscription
-      }
-      // if (
-      //   (await ProxyRPC.getrawtransactionVerbose(input.txid))
-      //     .confirmations === 0
-      // ) {
+      // if ((await getTxStatus(input.txid)).confirmed === false) {
       //   return true; // to error on the safer side, and treat this as possible to have a inscription
       // }
+      if (
+        (await ProxyRPC.getrawtransactionVerbose(input.txid))
+          .confirmations === 0
+      ) {
+        return true; // to error on the safer side, and treat this as possible to have a inscription
+      }
       const previousOutput = `${input.txid}:${input.vout}`;
       try {
         if ((await itemProvider.getTokenByOutput(previousOutput)) !== null) {
@@ -378,8 +378,8 @@ Needed:       ${satToBtc(amount)} BTC`);
     const [ordinalUtxoTxId, ordinalUtxoVout] =
       listing.seller.ordItem.output.split(':');
     const tx = bitcoin.Transaction.fromHex(
-      // await ProxyRPC.getrawtransaction(ordinalUtxoTxId),
-      await getTxHex(ordinalUtxoTxId),
+      await ProxyRPC.getrawtransaction(ordinalUtxoTxId),
+      // await getTxHex(ordinalUtxoTxId),
     );
     // No need to add this witness if the seller is using taproot
     if (!listing.seller.tapInternalKey) {
