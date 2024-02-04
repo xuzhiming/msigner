@@ -13,7 +13,7 @@ export const ORDINALS_API_URL = BTC_NETWORK === 'mainnet'
     : 'https://explorer-signet.openordex.org';
 export const PLATFORM_FEE_ADDRESS = process.env.VITE_PLATFORM_FEE_ADDRESS ||
     'tb1qmvjxuhtnpx577k26dw4y29jtd45mlh75cwl9rp';
-export const DUMMY_UTXO_VALUE = Number(process.env.DUMMY_UTXO_VALUE ?? 1000);
+export const DUMMY_UTXO_VALUE = Number(process.env.VITE_DUMMY_UTXO_VALUE ?? 1000);
 export const DUMMY_UTXO_MAX_VALUE = Number(process.env.DUMMY_UTXO_MAX_VALUE ?? 1000);
 export const DUMMY_UTXO_MIN_VALUE = Number(process.env.DUMMY_UTXO_MIN_VALUE ?? 580);
 export const ORDINALS_POSTAGE_VALUE = Number(process.env.ORDINALS_POSTAGE_VALUE ?? 10000);
