@@ -1,5 +1,5 @@
 import * as bitcoin from 'bitcoinjs-lib';
-import { ProxyRPC } from './vendors/fullnoderpc';
+import { getTxHex } from './vendors/mempool';
 export const toXOnly = (pubKey) => pubKey.length === 32 ? pubKey : pubKey.subarray(1, 33);
 export const satToBtc = (sat) => sat / 100000000;
 export const btcToSats = (btc) => btc * 100000000;
@@ -14,7 +14,9 @@ export async function mapUtxos(utxosFromMempool) {
             vout: utxoFromMempool.vout,
             value: utxoFromMempool.value,
             status: utxoFromMempool.status,
-            tx: bitcoin.Transaction.fromHex(await ProxyRPC.getrawtransaction(utxoFromMempool.txid)),
+            tx: bitcoin.Transaction.fromHex(
+            // await ProxyRPC.getrawtransaction(utxoFromMempool.txid),
+            await getTxHex(utxoFromMempool.txid)),
         });
     }
     return ret;
