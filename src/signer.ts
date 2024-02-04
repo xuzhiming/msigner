@@ -91,7 +91,7 @@ export namespace SellerSigner {
 
     const tx = bitcoin.Transaction.fromHex(
       // await ProxyRPC.getrawtransaction(
-        // listing.seller.ordItem.output.split(':')[0]
+      // listing.seller.ordItem.output.split(':')[0]
       // ),
       await getTxHex(listing.seller.ordItem.output.split(':')[0]),
     );
@@ -346,11 +346,10 @@ Needed:       ${satToBtc(amount)} BTC`);
     }
 
     // if it's not confirmed, we search the input script for the inscription
-    const tx = 
-    await getTx(utxo.txid);
+    const tx = await getTx(utxo.txid);
     // await ProxyRPC.getrawtransactionVerbose(utxo.txid);
     let foundInscription = false;
-    console.log("check txid:", utxo.txid);
+    console.log('check txid:', utxo.txid);
     for (const input of tx.vin) {
       if ((await getTxStatus(input.txid)).confirmed === false) {
         return true; // to error on the safer side, and treat this as possible to have a inscription
@@ -474,6 +473,9 @@ Needed:       ${satToBtc(amount)} BTC`);
         p2shInputRedeemScript.redeemScript = p2sh.redeem?.output;
       } else {
         input.witnessUtxo = dummyUtxo.tx.outs[dummyUtxo.vout];
+        input.tapInternalKey = toXOnly(
+          Buffer.from(listing.buyer.buyerPublicKey!, 'hex'),
+        );
       }
 
       psbt.addInput({
@@ -517,6 +519,14 @@ Needed:       ${satToBtc(amount)} BTC`);
         p2shInputRedeemScriptUn.redeemScript = p2sh.redeem?.output;
       } else {
         input.witnessUtxo = utxo.tx.outs[utxo.vout];
+
+        input.tapInternalKey = toXOnly(
+          Buffer.from(listing.buyer.buyerPublicKey!, 'hex'),
+        );
+
+        // input.redeemScript = toXOnly(
+        //   Buffer.from(listing.buyer.buyerPublicKey!, 'hex'),
+        // );
       }
 
       psbt.addInput({
@@ -604,13 +614,12 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
     }
 
     // Change utxo
-    if (changeValue > DUMMY_UTXO_MIN_VALUE)
-    {
+    if (changeValue > DUMMY_UTXO_MIN_VALUE) {
       psbt.addOutput({
         address: listing.buyer.buyerAddress,
         value: changeValue,
       });
-    }else {
+    } else {
       fee += changeValue;
     }
 

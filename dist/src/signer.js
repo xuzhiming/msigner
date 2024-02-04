@@ -217,7 +217,7 @@ Needed:       ${satToBtc(amount)} BTC`);
         const tx = await getTx(utxo.txid);
         // await ProxyRPC.getrawtransactionVerbose(utxo.txid);
         let foundInscription = false;
-        console.log("check txid:", utxo.txid);
+        console.log('check txid:', utxo.txid);
         for (const input of tx.vin) {
             if ((await getTxStatus(input.txid)).confirmed === false) {
                 return true; // to error on the safer side, and treat this as possible to have a inscription
@@ -318,6 +318,7 @@ Needed:       ${satToBtc(amount)} BTC`);
             }
             else {
                 input.witnessUtxo = dummyUtxo.tx.outs[dummyUtxo.vout];
+                input.tapInternalKey = toXOnly(Buffer.from(listing.buyer.buyerPublicKey, 'hex'));
             }
             psbt.addInput({
                 ...input,
@@ -354,6 +355,10 @@ Needed:       ${satToBtc(amount)} BTC`);
             }
             else {
                 input.witnessUtxo = utxo.tx.outs[utxo.vout];
+                input.tapInternalKey = toXOnly(Buffer.from(listing.buyer.buyerPublicKey, 'hex'));
+                // input.redeemScript = toXOnly(
+                //   Buffer.from(listing.buyer.buyerPublicKey!, 'hex'),
+                // );
             }
             psbt.addInput({
                 ...input,
