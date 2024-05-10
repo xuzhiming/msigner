@@ -39,6 +39,7 @@ export type IGetRawTransactionVerboseResult = {
 };
 export declare class ProxyRPC {
     proxyUri: string;
+    cachedTxs: Map<string, string>;
     constructor(uri: string);
     getrawtransaction(params: {}): Promise<any>;
     static getClient(): ProxyRPC;

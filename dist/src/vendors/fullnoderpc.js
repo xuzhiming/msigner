@@ -6,6 +6,7 @@ let proxyClient;
 export class ProxyRPC {
     constructor(uri) {
         this.proxyUri = uri;
+        this.cachedTxs = new Map();
     }
     async getrawtransaction(params) {
         const form = new FormData();
@@ -27,8 +28,15 @@ export class ProxyRPC {
     }
     static async getrawtransaction(txid) {
         const client = this.getClient();
-        const res = await client.getrawtransaction({ txid });
-        return res;
+        if (client.cachedTxs.get(txid) != undefined) {
+            return client.cachedTxs.get(txid);
+        }
+        else {
+            const res = await client.getrawtransaction({ txid });
+            if (res != undefined && res != null)
+                client.cachedTxs.set(txid, res);
+            return res;
+        }
     }
     static async getrawtransactionVerbose(txid) {
         const client = this.getClient();

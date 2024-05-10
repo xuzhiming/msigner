@@ -56,8 +56,10 @@ export type IGetRawTransactionVerboseResult = {
 
 export class ProxyRPC {
   proxyUri: string;
+  cachedTxs: Map<string, string>;
   constructor(uri: string) {
     this.proxyUri = uri;
+    this.cachedTxs = new Map<string, string>();
   }
   async getrawtransaction(params: {}): Promise<any> {
     const form = new FormData();
@@ -66,7 +68,7 @@ export class ProxyRPC {
     form.append('params', JSON.stringify(params));
 
     const resp = await axios.post(this.proxyUri, form);
-    
+
     return resp.data.result;
   }
 
@@ -81,8 +83,14 @@ export class ProxyRPC {
   }
   static async getrawtransaction(txid: string): Promise<string> {
     const client = this.getClient();
-    const res = await client.getrawtransaction({ txid });
-    return res as string;
+    if (client.cachedTxs.get(txid) != undefined) {
+      return client.cachedTxs.get(txid) as string;
+    } else {
+      const res = await client.getrawtransaction({ txid });
+      if (res != undefined && res != null)
+        client.cachedTxs.set(txid, res as string);
+      return res as string;
+    }
   }
 
   static async getrawtransactionVerbose(
