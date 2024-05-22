@@ -91,7 +91,7 @@ export namespace SellerSigner {
 
     const tx = bitcoin.Transaction.fromHex(
       await ProxyRPC.getrawtransaction(
-      listing.seller.ordItem.output.split(':')[0]
+        listing.seller.ordItem.output.split(':')[0],
       ),
       // await getTxHex(listing.seller.ordItem.output.split(':')[0]),
     );
@@ -347,7 +347,7 @@ Needed:       ${satToBtc(amount)} BTC`);
 
     // if it's not confirmed, we search the input script for the inscription
     const tx = //await getTx(utxo.txid);
-    await ProxyRPC.getrawtransactionVerbose(utxo.txid);
+      await ProxyRPC.getrawtransactionVerbose(utxo.txid);
     let foundInscription = false;
     console.log('check txid:', utxo.txid);
     for (const input of tx.vin) {
@@ -355,8 +355,8 @@ Needed:       ${satToBtc(amount)} BTC`);
       //   return true; // to error on the safer side, and treat this as possible to have a inscription
       // }
       if (
-        (await ProxyRPC.getrawtransactionVerbose(input.txid))
-          .confirmations === 0
+        (await ProxyRPC.getrawtransactionVerbose(input.txid)).confirmations ===
+        0
       ) {
         return true; // to error on the safer side, and treat this as possible to have a inscription
       }
@@ -564,12 +564,12 @@ Needed:       ${satToBtc(amount)} BTC`);
     // platformFeeValue =
     //   platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 0;
 
-    // if (platformFeeValue > 0) {
-    psbt.addOutput({
-      address: listing.buyer.platAddress || PLATFORM_FEE_ADDRESS,
-      value: listing.buyer.platFee,
-    });
-    // }
+    if (listing.buyer.platFee > 0) {
+      psbt.addOutput({
+        address: listing.buyer.platAddress || PLATFORM_FEE_ADDRESS,
+        value: listing.buyer.platFee,
+      });
+    }
 
     const makeBp = listing.seller.makerFeeBp || 0;
     if (makeBp > 0) {

@@ -22,8 +22,8 @@ export function calculateTxBytesFeeWithRate(
   includeChangeOutput: 0 | 1 = 1,
 ): number {
   const baseTxSize = 10;
-  const inSize = 180;
-  const outSize = 34;
+  const inSize = 70;
+  const outSize = 33;
 
   const txSize =
     baseTxSize +

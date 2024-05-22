@@ -5,8 +5,8 @@ export async function calculateTxBytesFee(vinsLength, voutsLength, feeRateTier, 
 }
 export function calculateTxBytesFeeWithRate(vinsLength, voutsLength, feeRate, includeChangeOutput = 1) {
     const baseTxSize = 10;
-    const inSize = 180;
-    const outSize = 34;
+    const inSize = 70;
+    const outSize = 33;
     const txSize = baseTxSize +
         vinsLength * inSize +
         voutsLength * outSize +

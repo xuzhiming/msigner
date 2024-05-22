@@ -219,8 +219,8 @@ Needed:       ${satToBtc(amount)} BTC`);
             // if ((await getTxStatus(input.txid)).confirmed === false) {
             //   return true; // to error on the safer side, and treat this as possible to have a inscription
             // }
-            if ((await ProxyRPC.getrawtransactionVerbose(input.txid))
-                .confirmations === 0) {
+            if ((await ProxyRPC.getrawtransactionVerbose(input.txid)).confirmations ===
+                0) {
                 return true; // to error on the safer side, and treat this as possible to have a inscription
             }
             const previousOutput = `${input.txid}:${input.vout}`;
@@ -381,12 +381,12 @@ Needed:       ${satToBtc(amount)} BTC`);
         // );
         // platformFeeValue =
         //   platformFeeValue > DUMMY_UTXO_MIN_VALUE ? platformFeeValue : 0;
-        // if (platformFeeValue > 0) {
-        psbt.addOutput({
-            address: listing.buyer.platAddress || PLATFORM_FEE_ADDRESS,
-            value: listing.buyer.platFee,
-        });
-        // }
+        if (listing.buyer.platFee > 0) {
+            psbt.addOutput({
+                address: listing.buyer.platAddress || PLATFORM_FEE_ADDRESS,
+                value: listing.buyer.platFee,
+            });
+        }
         const makeBp = listing.seller.makerFeeBp || 0;
         if (makeBp > 0) {
             psbt.addOutput({
