@@ -165,9 +165,7 @@ export var BuyerSigner;
     }
     BuyerSigner.selectDummyUTXOs = selectDummyUTXOs;
     async function selectPaymentUTXOs(utxos, amount, // amount is expected total output (except tx fee)
-    vinsLength, voutsLength, 
-    // feeRateTier: string,
-    feeRate, itemProvider, platFee = PLATFORM_FEE, dummyUtxos = []) {
+    vinsLength, voutsLength, feeRateTier, feeRate, itemProvider, platFee = PLATFORM_FEE, dummyUtxos = []) {
         amount += DUMMY_UTXO_VALUE * 4 + platFee;
         const selectedUtxos = [];
         let selectedAmount = DUMMY_UTXO_VALUE * 2;
@@ -188,7 +186,8 @@ export var BuyerSigner;
             }
             selectedUtxos.push(utxo);
             selectedAmount += utxo.value;
-            const fee = calculateTxFeeWithRate(feeRate, vinsLength + selectedUtxos.length, voutsLength);
+            const recommendedFeeRate = feeRate == 0 ? await getFees(feeRateTier) : feeRate;
+            const fee = calculateTxFeeWithRate(recommendedFeeRate, vinsLength + selectedUtxos.length, voutsLength);
             // const fee = await calculateTxBytesFee(
             //   vinsLength + selectedUtxos.length,
             //   voutsLength,
@@ -548,14 +547,11 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
         };
     }
     BuyerSigner.verifySignedBuyingPSBTBase64 = verifySignedBuyingPSBTBase64;
-    async function generateUnsignedCreateDummyUtxoPSBTBase64(address, buyerPublicKey, unqualifiedUtxos, 
-    // feeRateTier: string,
-    feeRate, itemProvider) {
+    async function generateUnsignedCreateDummyUtxoPSBTBase64(address, buyerPublicKey, unqualifiedUtxos, feeRateTier, feeRate, itemProvider) {
         const psbt = new bitcoin.Psbt({ network });
         const [mappedUnqualifiedUtxos, recommendedFee] = await Promise.all([
             mapUtxos(unqualifiedUtxos),
-            // getFees(feeRateTier),
-            feeRate
+            feeRate == 0 ? getFees(feeRateTier) : feeRate,
         ]);
         // Loop the unqualified utxos until we have enough to create a dummy utxo
         let totalValue = 0;
