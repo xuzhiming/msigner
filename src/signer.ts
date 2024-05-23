@@ -279,7 +279,8 @@ export namespace BuyerSigner {
     amount: number, // amount is expected total output (except tx fee)
     vinsLength: number,
     voutsLength: number,
-    feeRateTier: string,
+    // feeRateTier: string,
+    feeRate: number,
     itemProvider: ItemProvider,
     platFee: number = PLATFORM_FEE,
     dummyUtxos: AddressTxsUtxo[] = [],
@@ -309,12 +310,12 @@ export namespace BuyerSigner {
       }
       selectedUtxos.push(utxo);
       selectedAmount += utxo.value;
-
-      const fee = await calculateTxBytesFee(
-        vinsLength + selectedUtxos.length,
-        voutsLength,
-        feeRateTier,
-      );
+      const fee = calculateTxFeeWithRate(feeRate, vinsLength + selectedUtxos.length, voutsLength)
+      // const fee = await calculateTxBytesFee(
+      //   vinsLength + selectedUtxos.length,
+      //   voutsLength,
+      //   feeRateTier,
+      // );
       if (selectedAmount >= amount + fee) {
         break;
       }
@@ -796,13 +797,15 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
     address: string,
     buyerPublicKey: string | undefined,
     unqualifiedUtxos: AddressTxsUtxo[],
-    feeRateTier: string,
+    // feeRateTier: string,
+    feeRate: number,
     itemProvider: ItemProvider,
   ): Promise<string> {
     const psbt = new bitcoin.Psbt({ network });
     const [mappedUnqualifiedUtxos, recommendedFee] = await Promise.all([
       mapUtxos(unqualifiedUtxos),
-      getFees(feeRateTier),
+      // getFees(feeRateTier),
+      feeRate
     ]);
 
     // Loop the unqualified utxos until we have enough to create a dummy utxo

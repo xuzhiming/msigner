@@ -3,7 +3,7 @@ import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from '@bitcoinerlab/secp256k1';
 import { BTC_NETWORK, BUYING_PSBT_BUYER_RECEIVE_INDEX, BUYING_PSBT_PLATFORM_FEE_INDEX, BUYING_PSBT_SELLER_SIGNATURE_INDEX, DUMMY_UTXO_MIN_VALUE, DUMMY_UTXO_VALUE, ORDINALS_POSTAGE_VALUE, PLATFORM_FEE, PLATFORM_FEE_ADDRESS, } from './constant';
 import { generateTxidFromHash, isP2SHAddress, mapUtxos, satToBtc, toXOnly, } from './util';
-import { calculateTxBytesFee, calculateTxBytesFeeWithRate, getSellerOrdOutputValue, } from './vendors/feeprovider';
+import { calculateTxBytesFeeWithRate, getSellerOrdOutputValue, } from './vendors/feeprovider';
 import { ProxyRPC } from './vendors/fullnoderpc';
 import { getFees, getTxHex, getUtxosByAddress, getFeesRecommended, } from './vendors/mempool';
 import { InvalidArgumentError, } from './interfaces';
@@ -165,7 +165,9 @@ export var BuyerSigner;
     }
     BuyerSigner.selectDummyUTXOs = selectDummyUTXOs;
     async function selectPaymentUTXOs(utxos, amount, // amount is expected total output (except tx fee)
-    vinsLength, voutsLength, feeRateTier, itemProvider, platFee = PLATFORM_FEE, dummyUtxos = []) {
+    vinsLength, voutsLength, 
+    // feeRateTier: string,
+    feeRate, itemProvider, platFee = PLATFORM_FEE, dummyUtxos = []) {
         amount += DUMMY_UTXO_VALUE * 4 + platFee;
         const selectedUtxos = [];
         let selectedAmount = DUMMY_UTXO_VALUE * 2;
@@ -186,7 +188,12 @@ export var BuyerSigner;
             }
             selectedUtxos.push(utxo);
             selectedAmount += utxo.value;
-            const fee = await calculateTxBytesFee(vinsLength + selectedUtxos.length, voutsLength, feeRateTier);
+            const fee = calculateTxFeeWithRate(feeRate, vinsLength + selectedUtxos.length, voutsLength);
+            // const fee = await calculateTxBytesFee(
+            //   vinsLength + selectedUtxos.length,
+            //   voutsLength,
+            //   feeRateTier,
+            // );
             if (selectedAmount >= amount + fee) {
                 break;
             }
@@ -541,11 +548,14 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
         };
     }
     BuyerSigner.verifySignedBuyingPSBTBase64 = verifySignedBuyingPSBTBase64;
-    async function generateUnsignedCreateDummyUtxoPSBTBase64(address, buyerPublicKey, unqualifiedUtxos, feeRateTier, itemProvider) {
+    async function generateUnsignedCreateDummyUtxoPSBTBase64(address, buyerPublicKey, unqualifiedUtxos, 
+    // feeRateTier: string,
+    feeRate, itemProvider) {
         const psbt = new bitcoin.Psbt({ network });
         const [mappedUnqualifiedUtxos, recommendedFee] = await Promise.all([
             mapUtxos(unqualifiedUtxos),
-            getFees(feeRateTier),
+            // getFees(feeRateTier),
+            feeRate
         ]);
         // Loop the unqualified utxos until we have enough to create a dummy utxo
         let totalValue = 0;
