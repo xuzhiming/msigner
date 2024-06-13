@@ -118,6 +118,7 @@ export interface IListingState {
   };
 
   isBidder?: boolean | false;
+  buyerTx?: string | undefined;
 }
 
 export interface utxo {

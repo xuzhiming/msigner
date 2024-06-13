@@ -1,26 +1,32 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProxyRPC = void 0;
 // import { RPCClient } from 'rpc-bitcoin';
-import axios from 'axios';
-import { BTC_NETWORK, } from '../constant';
+const axios_1 = __importDefault(require("axios"));
+const constant_1 = require("../constant");
 // let client: RPCClient | undefined;
 let proxyClient;
-export class ProxyRPC {
+class ProxyRPC {
     constructor(uri) {
         this.proxyUri = uri;
         this.cachedTxs = new Map();
     }
     async getrawtransaction(params) {
         const form = new FormData();
-        form.append('isMainNet', '' + (BTC_NETWORK === 'mainnet'));
+        form.append('isMainNet', '' + (constant_1.BTC_NETWORK === 'mainnet'));
         form.append('method', 'getrawtransaction');
         form.append('params', JSON.stringify(params));
-        const resp = await axios.post(this.proxyUri, form);
+        const resp = await axios_1.default.post(this.proxyUri, form);
         return resp.data.result;
     }
     static getClient() {
         if (proxyClient)
             return proxyClient;
         let url = 'https://sandbox-api.bidder.art/rare/proxy/rpcProxy';
-        if (BTC_NETWORK === 'mainnet') {
+        if (constant_1.BTC_NETWORK === 'mainnet') {
             url = 'https://api.bidder.art/rare/proxy/rpcProxy';
         }
         proxyClient = new ProxyRPC(url);
@@ -44,6 +50,7 @@ export class ProxyRPC {
         return res;
     }
 }
+exports.ProxyRPC = ProxyRPC;
 /*
  *
 

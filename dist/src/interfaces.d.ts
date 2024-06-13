@@ -99,6 +99,7 @@ export interface IListingState {
         platFee: number;
     };
     isBidder?: boolean | false;
+    buyerTx?: string | undefined;
 }
 export interface utxo {
     txid: string;

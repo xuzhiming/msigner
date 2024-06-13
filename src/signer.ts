@@ -2,6 +2,7 @@ import { AddressTxsUtxo } from '@mempool/mempool.js/lib/interfaces/bitcoin/addre
 import * as bitcoin from 'bitcoinjs-lib';
 // import * as ecc from 'tiny-secp256k1';
 import * as ecc from '@bitcoinerlab/secp256k1';
+import { ECPairFactory } from 'ecpair';
 
 import {
   BTC_NETWORK,
@@ -89,12 +90,17 @@ export namespace SellerSigner {
     const [ordinalUtxoTxId, ordinalUtxoVout] =
       listing.seller.ordItem.output.split(':');
 
-    const tx = bitcoin.Transaction.fromHex(
-      await ProxyRPC.getrawtransaction(
-        listing.seller.ordItem.output.split(':')[0],
-      ),
-      // await getTxHex(listing.seller.ordItem.output.split(':')[0]),
-    );
+    let tx;
+    if (listing.buyerTx) {
+      tx = bitcoin.Transaction.fromHex(listing.buyerTx);
+    } else {
+      tx = bitcoin.Transaction.fromHex(
+        await ProxyRPC.getrawtransaction(
+          listing.seller.ordItem.output.split(':')[0],
+        ),
+        // await getTxHex(listing.seller.ordItem.output.split(':')[0]),
+      );
+    }
 
     // No need to add this witness if the seller is using taproot
     if (!listing.seller.tapInternalKey) {
@@ -385,10 +391,17 @@ Needed:       ${satToBtc(amount)} BTC`);
   async function getSellerInputAndOutput(listing: IListingState) {
     const [ordinalUtxoTxId, ordinalUtxoVout] =
       listing.seller.ordItem.output.split(':');
-    const tx = bitcoin.Transaction.fromHex(
-      await ProxyRPC.getrawtransaction(ordinalUtxoTxId),
-      // await getTxHex(ordinalUtxoTxId),
-    );
+
+    let tx = null;
+    if (listing.buyerTx) {
+      tx = bitcoin.Transaction.fromHex(listing.buyerTx);
+    } else {
+      tx = bitcoin.Transaction.fromHex(
+        await ProxyRPC.getrawtransaction(ordinalUtxoTxId),
+        // await getTxHex(ordinalUtxoTxId),
+      );
+    }
+
     // No need to add this witness if the seller is using taproot
     if (!listing.seller.tapInternalKey) {
       for (let outputIndex = 0; outputIndex < tx.outs.length; outputIndex++) {
@@ -836,6 +849,8 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
           redeem: { output: redeemScript },
         });
         input.redeemScript = p2sh.redeem?.output;
+      } else {
+        input.tapInternalKey = toXOnly(Buffer.from(buyerPublicKey!, 'hex'));
       }
       input.witnessUtxo = utxo.tx.outs[utxo.vout];
 
