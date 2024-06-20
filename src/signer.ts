@@ -136,10 +136,11 @@ export namespace SellerSigner {
     psbt.addInput(input);
 
     const makerBp = listing.seller.makerFeeBp || 0;
+    const chargeFeeBp = listing.seller.chargeFeeBp || 0;
 
     const sellerOutput = getSellerOrdOutputValue(
       listing.seller.price,
-      makerBp,
+      makerBp + chargeFeeBp,
       listing.seller.ordItem.outputValue,
     );
 
@@ -152,6 +153,12 @@ export namespace SellerSigner {
       psbt.addOutput({
         address: listing.seller.makerAddress,
         value: (listing.seller.price * makerBp) / 100,
+      });
+    }
+    if (chargeFeeBp > 0) {
+      psbt.addOutput({
+        address: listing.seller.chargeAddress!,
+        value: (listing.seller.price * chargeFeeBp) / 100,
       });
     }
 
@@ -431,7 +438,7 @@ Needed:       ${satToBtc(amount)} BTC`);
         address: listing.seller.sellerReceiveAddress,
         value: getSellerOrdOutputValue(
           listing.seller.price,
-          listing.seller.makerFeeBp || 0,
+          (listing.seller.makerFeeBp || 0) + (listing.seller.chargeFeeBp || 0),
           listing.seller.ordItem.outputValue,
         ),
       },
@@ -597,6 +604,14 @@ Needed:       ${satToBtc(amount)} BTC`);
       psbt.addOutput({
         address: listing.seller.makerAddress,
         value: (listing.seller.price * makeBp) / 100,
+      });
+    }
+
+    const chargeFeeBp = listing.seller.chargeFeeBp || 0;
+    if (chargeFeeBp > 0) {
+      psbt.addOutput({
+        address: listing.seller.chargeAddress!,
+        value: (listing.seller.price * chargeFeeBp) / 100,
       });
     }
 
