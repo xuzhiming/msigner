@@ -1,5 +1,6 @@
 import { AddressTxsUtxo } from '@mempool/mempool.js/lib/interfaces/bitcoin/addresses';
-import { FeeProvider, IListingState, IOrdAPIPostPSBTBuying, IOrdAPIPostPSBTListing, ItemProvider, utxo } from './interfaces';
+import * as bitcoin from 'bitcoinjs-lib';
+import { FeeProvider, IListingState, IOrdAPIPostPSBTBuying, IOrdAPIPostPSBTListing, ItemProvider, utxo, IOrdItem } from './interfaces';
 export declare function getAddressUtxos(address: string): Promise<AddressTxsUtxo[]>;
 export declare function getRecommendedFees(): Promise<import("@mempool/mempool.js/lib/interfaces/bitcoin/fees").FeesRecommended>;
 export declare function getRecommendFee(feeRateTier: string): Promise<number>;
@@ -18,6 +19,8 @@ export declare namespace BuyerSigner {
     function verifySignedBuyingPSBTBase64(req: IOrdAPIPostPSBTBuying, feeProvider: FeeProvider, itemProvider: ItemProvider): Promise<{
         newOutputOffset: number;
     }>;
+    function sendInscription(inscription: IOrdItem, from: string, publicKey: string, //hex
+    to: string, itemCheck: ItemProvider): Promise<bitcoin.Psbt>;
     function generateUnsignedCreateDummyUtxoPSBTBase64(address: string, buyerPublicKey: string | undefined, unqualifiedUtxos: AddressTxsUtxo[], feeRateTier: string, feeRate: number, itemProvider: ItemProvider): Promise<string>;
 }
 //# sourceMappingURL=signer.d.ts.map

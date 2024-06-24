@@ -46,6 +46,7 @@ import {
   ItemProvider,
   WitnessUtxo,
   utxo,
+  IOrdItem,
 } from './interfaces';
 import { testnet } from 'bitcoinjs-lib/src/networks';
 
@@ -306,6 +307,7 @@ export namespace BuyerSigner {
     // Sort descending by value, and filter out dummy utxos
     utxos = utxos.sort((a, b) => b.value - a.value);
 
+    let gasFee = 0;
     for (const utxo of utxos) {
       // Never spend a utxo that contains an inscription for cardinal purposes
       if (await doesUtxoContainInscription(utxo, itemProvider)) {
@@ -336,15 +338,16 @@ export namespace BuyerSigner {
       //   voutsLength,
       //   feeRateTier,
       // );
+      gasFee = fee;
       if (selectedAmount >= amount + fee) {
         break;
       }
     }
 
-    if (selectedAmount < amount) {
+    if (selectedAmount < amount + gasFee) {
       throw new InvalidArgumentError(`Not enough cardinal spendable funds or too many dust utxo.
 Address has:  ${satToBtc(selectedAmount)} BTC
-Needed:       ${satToBtc(amount)} BTC`);
+Needed:       ${satToBtc(amount + gasFee)} BTC`);
     }
 
     return await mapUtxos(selectedUtxos);
@@ -826,6 +829,84 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
     return {
       newOutputOffset: 0, // based on 2-dummy algo, the new outputOffset is 0
     };
+  }
+
+  //return unsigned psbt
+  export async function sendInscription(
+    inscription: IOrdItem,
+    from: string,
+    publicKey: string, //hex
+    to: string,
+    itemCheck: ItemProvider,
+  ): Promise<bitcoin.Psbt> {
+    const addressUtxos = await getAddressUtxos(from);
+    const recommendFees = await getRecommendedFees();
+
+    const fee = calculateTxFeeWithRate(recommendFees.hourFee, 2, 2);
+    const payUtxos = await selectPaymentUTXOs(
+      addressUtxos,
+      fee,
+      2,
+      2,
+      '',
+      recommendFees.hourFee,
+      itemCheck,
+      0,
+    );
+
+    const psbt = new bitcoin.Psbt({ network: bitcoin.networks.testnet });
+
+    const sighashType = bitcoin.Transaction.SIGHASH_ALL;
+    const [ordinalUtxoTxId, ordinalUtxoVout] = inscription.output.split(':');
+
+    const tx = bitcoin.Transaction.fromHex(
+      await ProxyRPC.getrawtransaction(inscription.output.split(':')[0]),
+    );
+
+    const input: any = {
+      hash: ordinalUtxoTxId,
+      index: parseInt(ordinalUtxoVout),
+      nonWitnessUtxo: tx.toBuffer(),
+      // No problem in always adding a witnessUtxo here
+      witnessUtxo: tx.outs[parseInt(ordinalUtxoVout)],
+      sighashType: sighashType,
+    };
+    // If taproot is used, we need to add the internal key
+
+    input.tapInternalKey = toXOnly(tx.toBuffer().constructor(publicKey, 'hex'));
+
+    psbt.addInput(input);
+
+    let totalInput = 0;
+    for (const utxo of payUtxos) {
+      const input: any = {
+        hash: utxo.txid,
+        index: utxo.vout,
+        nonWitnessUtxo: utxo.tx.toBuffer(),
+        sighashType: sighashType,
+      };
+
+      input.witnessUtxo = utxo.tx.outs[utxo.vout];
+
+      input.tapInternalKey = toXOnly(Buffer.from(publicKey, 'hex'));
+
+      psbt.addInput({
+        ...input,
+      });
+
+      totalInput += utxo.value;
+    }
+
+    psbt.addOutput({
+      address: to,
+      value: inscription.outputValue,
+    });
+
+    psbt.addOutput({
+      address: from,
+      value: totalInput - fee,
+    });
+    return psbt;
   }
 
   export async function generateUnsignedCreateDummyUtxoPSBTBase64(
