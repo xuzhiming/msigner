@@ -298,11 +298,12 @@ export namespace BuyerSigner {
     itemProvider: ItemProvider,
     platFee: number = PLATFORM_FEE,
     dummyUtxos: AddressTxsUtxo[] = [],
+    dummyValue: number = DUMMY_UTXO_VALUE,
   ) {
-    amount += DUMMY_UTXO_VALUE * 4 + platFee;
+    amount += dummyValue * 4 + platFee;
 
     const selectedUtxos = [];
-    let selectedAmount = DUMMY_UTXO_VALUE * 2;
+    let selectedAmount = dummyValue * 2;
 
     // Sort descending by value, and filter out dummy utxos
     utxos = utxos.sort((a, b) => b.value - a.value);
@@ -320,7 +321,7 @@ export namespace BuyerSigner {
       ) {
         continue;
       }
-      if (utxo.value < DUMMY_UTXO_VALUE) {
+      if (utxo.value < dummyValue) {
         continue;
       }
       selectedUtxos.push(utxo);
@@ -852,9 +853,11 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
       recommendFees.hourFee,
       itemCheck,
       0,
+      [],
+      0,
     );
 
-    const psbt = new bitcoin.Psbt({ network: bitcoin.networks.testnet });
+    const psbt = new bitcoin.Psbt({ network: network });
 
     const sighashType = bitcoin.Transaction.SIGHASH_ALL;
     const [ordinalUtxoTxId, ordinalUtxoVout] = inscription.output.split(':');
@@ -902,10 +905,12 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
       value: inscription.outputValue,
     });
 
-    psbt.addOutput({
-      address: from,
-      value: totalInput - fee,
-    });
+    if (totalInput > fee)
+      psbt.addOutput({
+        address: from,
+        value: totalInput - fee,
+      });
+
     return psbt;
   }
 

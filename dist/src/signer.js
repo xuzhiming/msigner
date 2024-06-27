@@ -178,10 +178,10 @@ export var BuyerSigner;
     }
     BuyerSigner.selectDummyUTXOs = selectDummyUTXOs;
     async function selectPaymentUTXOs(utxos, amount, // amount is expected total output (except tx fee)
-    vinsLength, voutsLength, feeRateTier, feeRate, itemProvider, platFee = PLATFORM_FEE, dummyUtxos = []) {
-        amount += DUMMY_UTXO_VALUE * 4 + platFee;
+    vinsLength, voutsLength, feeRateTier, feeRate, itemProvider, platFee = PLATFORM_FEE, dummyUtxos = [], dummyValue = DUMMY_UTXO_VALUE) {
+        amount += dummyValue * 4 + platFee;
         const selectedUtxos = [];
-        let selectedAmount = DUMMY_UTXO_VALUE * 2;
+        let selectedAmount = dummyValue * 2;
         // Sort descending by value, and filter out dummy utxos
         utxos = utxos.sort((a, b) => b.value - a.value);
         let gasFee = 0;
@@ -195,7 +195,7 @@ export var BuyerSigner;
                     .length == 1) {
                 continue;
             }
-            if (utxo.value < DUMMY_UTXO_VALUE) {
+            if (utxo.value < dummyValue) {
                 continue;
             }
             selectedUtxos.push(utxo);
@@ -581,8 +581,8 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
         const addressUtxos = await getAddressUtxos(from);
         const recommendFees = await getRecommendedFees();
         const fee = calculateTxFeeWithRate(recommendFees.hourFee, 2, 2);
-        const payUtxos = await selectPaymentUTXOs(addressUtxos, fee, 2, 2, '', recommendFees.hourFee, itemCheck, 0);
-        const psbt = new bitcoin.Psbt({ network: bitcoin.networks.testnet });
+        const payUtxos = await selectPaymentUTXOs(addressUtxos, fee, 2, 2, '', recommendFees.hourFee, itemCheck, 0, [], 0);
+        const psbt = new bitcoin.Psbt({ network: network });
         const sighashType = bitcoin.Transaction.SIGHASH_ALL;
         const [ordinalUtxoTxId, ordinalUtxoVout] = inscription.output.split(':');
         const tx = bitcoin.Transaction.fromHex(await ProxyRPC.getrawtransaction(inscription.output.split(':')[0]));
@@ -616,10 +616,11 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
             address: to,
             value: inscription.outputValue,
         });
-        psbt.addOutput({
-            address: from,
-            value: totalInput - fee,
-        });
+        if (totalInput > fee)
+            psbt.addOutput({
+                address: from,
+                value: totalInput - fee,
+            });
         return psbt;
     }
     BuyerSigner.sendInscription = sendInscription;
