@@ -150,18 +150,18 @@ export namespace SellerSigner {
       value: sellerOutput,
     });
 
-    if (makerBp > 0) {
-      psbt.addOutput({
-        address: listing.seller.makerAddress,
-        value: (listing.seller.price * makerBp) / 100,
-      });
-    }
-    if (chargeFeeBp > 0) {
-      psbt.addOutput({
-        address: listing.seller.chargeAddress!,
-        value: (listing.seller.price * chargeFeeBp) / 100,
-      });
-    }
+    // if (makerBp > 0) {
+    //   psbt.addOutput({
+    //     address: listing.seller.makerAddress,
+    //     value: (listing.seller.price * makerBp) / 100,
+    //   });
+    // }
+    // if (chargeFeeBp > 0) {
+    //   psbt.addOutput({
+    //     address: listing.seller.chargeAddress!,
+    //     value: (listing.seller.price * chargeFeeBp) / 100,
+    //   });
+    // }
 
     listing.seller.unsignedListingPSBTBase64 = psbt.toBase64();
     return listing;
