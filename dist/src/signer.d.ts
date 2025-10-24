@@ -19,6 +19,8 @@ export declare namespace BuyerSigner {
     function verifySignedBuyingPSBTBase64(req: IOrdAPIPostPSBTBuying, feeProvider: FeeProvider, itemProvider: ItemProvider): Promise<{
         newOutputOffset: number;
     }>;
+    function sendParentInscription(inscription: IOrdItem, from: string, publicKey: string, //hex
+    to: string, serverFee: number, itemCheck: ItemProvider): Promise<bitcoin.Psbt>;
     function sendInscription(inscription: IOrdItem, from: string, publicKey: string, //hex
     to: string, itemCheck: ItemProvider): Promise<bitcoin.Psbt>;
     function generateUnsignedCreateDummyUtxoPSBTBase64(address: string, buyerPublicKey: string | undefined, unqualifiedUtxos: AddressTxsUtxo[], feeRateTier: string, feeRate: number, itemProvider: ItemProvider): Promise<string>;

@@ -833,6 +833,94 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
   }
 
   //return unsigned psbt
+  export async function sendParentInscription(
+    inscription: IOrdItem,
+    from: string,
+    publicKey: string, //hex
+    to: string,
+    serverFee: number,
+    itemCheck: ItemProvider,
+  ): Promise<bitcoin.Psbt> {
+    const addressUtxos = await getAddressUtxos(from);
+    const recommendFees = await getRecommendedFees();
+
+    const fee = calculateTxFeeWithRate(recommendFees.hourFee, 2, 2) + serverFee;
+    const payUtxos = await selectPaymentUTXOs(
+      addressUtxos,
+      fee,
+      3,
+      3,
+      '',
+      recommendFees.hourFee,
+      itemCheck,
+      0,
+      [],
+      0,
+    );
+
+    const psbt = new bitcoin.Psbt({ network: network });
+
+    const sighashType = bitcoin.Transaction.SIGHASH_ALL;
+    const [ordinalUtxoTxId, ordinalUtxoVout] = inscription.output.split(':');
+
+    const tx = bitcoin.Transaction.fromHex(
+      await ProxyRPC.getrawtransaction(inscription.output.split(':')[0]),
+    );
+
+    const input: any = {
+      hash: ordinalUtxoTxId,
+      index: parseInt(ordinalUtxoVout),
+      nonWitnessUtxo: tx.toBuffer(),
+      // No problem in always adding a witnessUtxo here
+      witnessUtxo: tx.outs[parseInt(ordinalUtxoVout)],
+      sighashType: sighashType,
+    };
+    // If taproot is used, we need to add the internal key
+
+    input.tapInternalKey = toXOnly(tx.toBuffer().constructor(publicKey, 'hex'));
+
+    psbt.addInput(input);
+
+    let totalInput = 0;
+    for (const utxo of payUtxos) {
+      const input: any = {
+        hash: utxo.txid,
+        index: utxo.vout,
+        nonWitnessUtxo: utxo.tx.toBuffer(),
+        sighashType: sighashType,
+      };
+
+      input.witnessUtxo = utxo.tx.outs[utxo.vout];
+
+      input.tapInternalKey = toXOnly(Buffer.from(publicKey, 'hex'));
+
+      psbt.addInput({
+        ...input,
+      });
+
+      totalInput += utxo.value;
+    }
+
+    psbt.addOutput({
+      address: to,
+      value: inscription.outputValue,
+    });
+
+    psbt.addOutput({
+      address: to,
+      value: serverFee,
+    });
+
+    if (totalInput > fee)
+      psbt.addOutput({
+        address: from,
+        value: totalInput - fee,
+      });
+
+    return psbt;
+  }
+
+  //return unsigned psbt
   export async function sendInscription(
     inscription: IOrdItem,
     from: string,
