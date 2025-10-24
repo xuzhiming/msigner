@@ -577,11 +577,11 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
     BuyerSigner.verifySignedBuyingPSBTBase64 = verifySignedBuyingPSBTBase64;
     //return unsigned psbt
     async function sendParentInscription(inscription, from, publicKey, //hex
-    to, serverFee, itemCheck) {
+    to, inscribeFee, feeRate, itemCheck) {
         const addressUtxos = await getAddressUtxos(from);
         const recommendFees = await getRecommendedFees();
-        const fee = calculateTxFeeWithRate(recommendFees.hourFee, 2, 2) + serverFee;
-        const payUtxos = await selectPaymentUTXOs(addressUtxos, fee, 3, 3, '', recommendFees.hourFee, itemCheck, 0, [], 0);
+        const fee = calculateTxFeeWithRate(feeRate, 3, 3) + inscribeFee;
+        const payUtxos = await selectPaymentUTXOs(addressUtxos, fee, 3, 3, '', feeRate, itemCheck, 0, [], 0);
         const psbt = new bitcoin.Psbt({ network: network });
         const sighashType = bitcoin.Transaction.SIGHASH_ALL;
         const [ordinalUtxoTxId, ordinalUtxoVout] = inscription.output.split(':');
@@ -618,7 +618,7 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
         });
         psbt.addOutput({
             address: to,
-            value: serverFee,
+            value: inscribeFee,
         });
         if (totalInput > fee)
             psbt.addOutput({

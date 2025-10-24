@@ -20,7 +20,7 @@ export declare namespace BuyerSigner {
         newOutputOffset: number;
     }>;
     function sendParentInscription(inscription: IOrdItem, from: string, publicKey: string, //hex
-    to: string, serverFee: number, itemCheck: ItemProvider): Promise<bitcoin.Psbt>;
+    to: string, inscribeFee: number, feeRate: number, itemCheck: ItemProvider): Promise<bitcoin.Psbt>;
     function sendInscription(inscription: IOrdItem, from: string, publicKey: string, //hex
     to: string, itemCheck: ItemProvider): Promise<bitcoin.Psbt>;
     function generateUnsignedCreateDummyUtxoPSBTBase64(address: string, buyerPublicKey: string | undefined, unqualifiedUtxos: AddressTxsUtxo[], feeRateTier: string, feeRate: number, itemProvider: ItemProvider): Promise<string>;
