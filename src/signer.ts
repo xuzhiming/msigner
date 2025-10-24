@@ -838,20 +838,21 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
     from: string,
     publicKey: string, //hex
     to: string,
-    serverFee: number,
+    inscribeFee: number,
+    feeRate: number,
     itemCheck: ItemProvider,
   ): Promise<bitcoin.Psbt> {
     const addressUtxos = await getAddressUtxos(from);
     const recommendFees = await getRecommendedFees();
 
-    const fee = calculateTxFeeWithRate(recommendFees.hourFee, 2, 2) + serverFee;
+    const fee = calculateTxFeeWithRate(feeRate, 3, 3) + inscribeFee;
     const payUtxos = await selectPaymentUTXOs(
       addressUtxos,
       fee,
       3,
       3,
       '',
-      recommendFees.hourFee,
+      feeRate,
       itemCheck,
       0,
       [],
@@ -908,7 +909,7 @@ Missing:    ${satToBtc(-changeValue)} BTC`);
 
     psbt.addOutput({
       address: to,
-      value: serverFee,
+      value: inscribeFee,
     });
 
     if (totalInput > fee)
